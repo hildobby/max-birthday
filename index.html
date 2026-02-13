@@ -1,0 +1,2666 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>Joyeux Anniversaire Max !</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Playfair+Display:ital,wght@0,700;0,800;0,900;1,700;1,800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<style>
+  *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+  :root {
+    --bg: #06050a;
+    --bg-card: #0f0d18;
+    --gold: #e8b94a;
+    --gold-light: #f5d77a;
+    --gold-dim: rgba(232,185,74,0.15);
+    --accent: #ff6b3d;
+    --white: #f0ece4;
+    --gray: #8a8694;
+    --gray-light: #b0adb8;
+    --purple: #6c5ce7;
+    --blue: #3498db;
+    --green: #2ecc71;
+    --radius: 20px;
+    --radius-sm: 14px;
+  }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    font-family: 'Inter', -apple-system, sans-serif;
+    background: var(--bg);
+    color: var(--white);
+    overflow-x: hidden;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  /* ==================================================================
+     SCREEN 1: FULL-SCREEN GIFT WRAP
+     ================================================================== */
+  #gift-screen {
+    position: fixed;
+    inset: 0;
+    z-index: 100;
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+    overflow: hidden;
+    transition: opacity 0.8s ease, visibility 0.8s ease;
+  }
+  #gift-screen.hidden { opacity: 0; visibility: hidden; pointer-events: none; }
+
+  .wrap-bg {
+    position: absolute;
+    inset: 0;
+    background:
+      radial-gradient(ellipse at 30% 40%, rgba(212,70,55,0.9), transparent 60%),
+      radial-gradient(ellipse at 70% 60%, rgba(155,44,31,0.8), transparent 60%),
+      linear-gradient(135deg, #b22a1a 0%, #d44637 30%, #c0392b 60%, #8e1d10 100%);
+    transition: transform 0.8s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.6s ease;
+  }
+
+  .wrap-pattern {
+    position: absolute;
+    inset: 0;
+    opacity: 0.06;
+    background-image:
+      radial-gradient(circle at 20% 20%, var(--gold) 1px, transparent 1px),
+      radial-gradient(circle at 70% 80%, var(--gold) 1px, transparent 1px),
+      radial-gradient(circle at 50% 50%, var(--gold) 0.5px, transparent 0.5px);
+    background-size: 60px 60px, 80px 80px, 40px 40px;
+    animation: patternDrift 20s linear infinite;
+    pointer-events: none;
+  }
+
+  @keyframes patternDrift {
+    0% { background-position: 0 0, 0 0, 0 0; }
+    100% { background-position: 60px 60px, -80px -80px, 40px -40px; }
+  }
+
+  .ribbon-strip {
+    position: absolute;
+    background: linear-gradient(180deg, var(--gold-light), var(--gold), var(--gold-light));
+    z-index: 2;
+    transition: transform 0.7s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.5s ease;
+  }
+
+  .ribbon-v {
+    left: 50%; top: 0; width: 48px; height: 100%;
+    transform: translateX(-50%);
+    box-shadow: 0 0 40px rgba(232,185,74,0.2);
+  }
+  .ribbon-h {
+    top: 50%; left: 0; width: 100%; height: 48px;
+    transform: translateY(-50%);
+    box-shadow: 0 0 40px rgba(232,185,74,0.2);
+  }
+
+  .ribbon-v::before, .ribbon-h::before {
+    content: '';
+    position: absolute;
+    background: rgba(0,0,0,0.1);
+  }
+  .ribbon-v::before {
+    left: 6px; right: 6px; top: 0; bottom: 0;
+    border-left: 1px solid rgba(255,255,255,0.2);
+    border-right: 1px solid rgba(255,255,255,0.2);
+  }
+  .ribbon-h::before {
+    top: 6px; bottom: 6px; left: 0; right: 0;
+    border-top: 1px solid rgba(255,255,255,0.2);
+    border-bottom: 1px solid rgba(255,255,255,0.2);
+  }
+
+  .bow-wrap {
+    position: absolute;
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 5;
+    width: 140px; height: 100px;
+    transition: transform 0.7s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.5s ease;
+  }
+
+  .bow-loop-wrap {
+    position: absolute;
+    width: 60px; height: 46px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--gold-light), var(--gold));
+    border: 3px solid rgba(180,140,30,0.5);
+    box-shadow: 0 4px 20px rgba(232,185,74,0.3);
+    top: 8px;
+  }
+  .bow-loop-wrap.l { left: 0; transform: rotate(-25deg); }
+  .bow-loop-wrap.r { right: 0; transform: rotate(25deg); }
+  .bow-loop-wrap::before {
+    content: '';
+    position: absolute; inset: 6px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, rgba(255,255,255,0.15), transparent);
+  }
+
+  .bow-center-wrap {
+    position: absolute;
+    width: 32px; height: 32px;
+    background: radial-gradient(circle, var(--gold-light), var(--gold));
+    border-radius: 50%;
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 6;
+    box-shadow: 0 4px 20px rgba(232,185,74,0.4);
+  }
+
+  .bow-tail {
+    position: absolute;
+    width: 20px; height: 50px;
+    background: linear-gradient(180deg, var(--gold), var(--gold-light));
+    bottom: -20px;
+    border-radius: 0 0 8px 8px;
+  }
+  .bow-tail.l { left: 28px; transform: rotate(10deg); }
+  .bow-tail.r { right: 28px; transform: rotate(-10deg); }
+
+  .gift-sparkle {
+    position: absolute;
+    width: 3px; height: 3px;
+    background: var(--gold-light);
+    border-radius: 50%;
+    z-index: 3;
+    pointer-events: none;
+    animation: floatSparkle 3s ease-in-out infinite;
+  }
+
+  @keyframes floatSparkle {
+    0%, 100% { opacity: 0; transform: translateY(0) scale(0); }
+    30% { opacity: 1; transform: translateY(-20px) scale(1.2); }
+    70% { opacity: 0.8; transform: translateY(-40px) scale(1); }
+    100% { opacity: 0; transform: translateY(-60px) scale(0); }
+  }
+
+  /* Gift screen message */
+  .gift-msg {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 8;
+    text-align: center;
+    pointer-events: none;
+    width: 80%;
+    max-width: 400px;
+  }
+
+  .gift-msg-text {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(22px, 6vw, 34px);
+    font-weight: 700;
+    color: var(--white);
+    text-shadow: 0 4px 24px rgba(0,0,0,0.5);
+    line-height: 1.35;
+  }
+
+  .gift-signature {
+    position: absolute;
+    bottom: max(90px, calc(env(safe-area-inset-bottom, 40px) + 50px));
+    right: 28px;
+    z-index: 10;
+    text-align: right;
+    pointer-events: none;
+  }
+
+  .gift-signature span {
+    font-family: 'Playfair Display', serif;
+    font-size: 18px;
+    font-style: italic;
+    color: var(--gold-light);
+    text-shadow: 0 2px 12px rgba(0,0,0,0.4);
+    letter-spacing: 1px;
+  }
+
+  .gift-cta {
+    position: absolute;
+    bottom: max(40px, env(safe-area-inset-bottom, 40px));
+    left: 0; right: 0;
+    text-align: center;
+    z-index: 10;
+  }
+
+  .gift-cta span {
+    font-size: 13px;
+    letter-spacing: 4px;
+    text-transform: uppercase;
+    color: rgba(255,255,255,0.6);
+    font-weight: 500;
+    animation: ctaPulse 2.5s ease-in-out infinite;
+    text-shadow: 0 2px 12px rgba(0,0,0,0.5);
+  }
+
+  @keyframes ctaPulse {
+    0%, 100% { opacity: 0.35; }
+    50% { opacity: 1; }
+  }
+
+  .gift-ambient {
+    position: absolute;
+    top: 50%; left: 50%;
+    width: 300px; height: 300px;
+    transform: translate(-50%, -50%);
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(232,185,74,0.08) 0%, transparent 70%);
+    z-index: 1;
+    animation: ambientPulse 4s ease-in-out infinite;
+    pointer-events: none;
+  }
+
+  @keyframes ambientPulse {
+    0%, 100% { transform: translate(-50%, -50%) scale(1); opacity: 0.5; }
+    50% { transform: translate(-50%, -50%) scale(1.5); opacity: 1; }
+  }
+
+  /* Unwrap states */
+  #gift-screen.unwrapping .ribbon-v { transform: translateX(-50%) scaleY(0); opacity: 0; }
+  #gift-screen.unwrapping .ribbon-h { transform: translateY(-50%) scaleX(0); opacity: 0; }
+  #gift-screen.unwrapping .bow-wrap { transform: translate(-50%, -50%) scale(0) rotate(180deg); opacity: 0; }
+  #gift-screen.unwrapping .wrap-bg { transform: scale(1.15); opacity: 0; }
+  #gift-screen.unwrapping .gift-cta,
+  #gift-screen.unwrapping .gift-msg,
+  #gift-screen.unwrapping .gift-signature { opacity: 0; transition: opacity 0.2s ease; }
+
+  /* ==================================================================
+     CONFETTI + LIGHT BURST
+     ================================================================== */
+  #confetti-canvas { position: fixed; inset: 0; z-index: 200; pointer-events: none; }
+
+  .light-burst {
+    position: fixed; inset: 0; z-index: 150;
+    background: radial-gradient(circle, rgba(245,215,122,0.8) 0%, rgba(232,185,74,0) 65%);
+    opacity: 0; pointer-events: none;
+  }
+  .light-burst.flash { animation: burstFlash 1.2s ease-out forwards; }
+
+  @keyframes burstFlash {
+    0% { opacity: 0; }
+    10% { opacity: 1; }
+    100% { opacity: 0; }
+  }
+
+  /* ==================================================================
+     SCREEN 2: BIRTHDAY MESSAGE
+     ================================================================== */
+  .overlay-screen {
+    position: fixed;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background: var(--bg);
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.6s ease, visibility 0.6s ease;
+    padding: 20px;
+    overflow: hidden;
+  }
+  .overlay-screen.visible { opacity: 1; visibility: visible; }
+  .overlay-screen.hidden { opacity: 0; visibility: hidden; pointer-events: none; }
+
+  #birthday-screen { z-index: 99; }
+  #europa-screen { z-index: 98; }
+
+  .bday-particles {
+    position: absolute; inset: 0;
+    pointer-events: none; overflow: hidden;
+  }
+
+  .bday-particle {
+    position: absolute;
+    width: 2px; height: 2px;
+    background: var(--gold);
+    border-radius: 50%;
+    opacity: 0;
+    animation: riseParticle 4s ease-in-out infinite;
+  }
+
+  @keyframes riseParticle {
+    0% { opacity: 0; transform: translateY(100vh) scale(0); }
+    20% { opacity: 1; }
+    80% { opacity: 0.5; }
+    100% { opacity: 0; transform: translateY(-20px) scale(1); }
+  }
+
+  .bday-pre {
+    font-size: clamp(14px, 3.5vw, 18px);
+    letter-spacing: 8px;
+    text-transform: uppercase;
+    color: var(--gold);
+    opacity: 0;
+    transform: translateY(30px);
+    transition: all 1s cubic-bezier(0.16, 1, 0.3, 1);
+    font-weight: 500;
+  }
+  .bday-pre.show { opacity: 1; transform: translateY(0); }
+
+  .bday-name {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(64px, 18vw, 140px);
+    font-weight: 900;
+    background: linear-gradient(135deg, var(--white) 0%, var(--gold-light) 50%, var(--gold) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    line-height: 1.05;
+    opacity: 0;
+    transform: scale(0.7);
+    transition: all 1.2s cubic-bezier(0.16, 1, 0.3, 1) 0.3s;
+    letter-spacing: -2px;
+  }
+  .bday-name.show { opacity: 1; transform: scale(1); }
+
+  .bday-age {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(90px, 25vw, 200px);
+    font-weight: 900;
+    color: transparent;
+    -webkit-text-stroke: 2px var(--gold);
+    line-height: 1;
+    opacity: 0;
+    transform: translateY(40px);
+    transition: all 1.2s cubic-bezier(0.16, 1, 0.3, 1) 0.6s;
+    position: relative;
+  }
+  .bday-age.show { opacity: 1; transform: translateY(0); }
+
+  .bday-age::after {
+    content: 'ans';
+    position: absolute;
+    font-size: clamp(14px, 3vw, 20px);
+    -webkit-text-stroke: 0;
+    color: var(--gray);
+    bottom: 10px; right: -40px;
+    font-family: 'Inter', sans-serif;
+    font-weight: 400;
+    letter-spacing: 3px;
+  }
+
+  .bday-sub {
+    font-size: clamp(13px, 3vw, 16px);
+    letter-spacing: 4px;
+    text-transform: uppercase;
+    color: var(--gray);
+    margin-top: 24px;
+    opacity: 0;
+    transform: translateY(20px);
+    transition: all 0.8s cubic-bezier(0.16, 1, 0.3, 1) 1s;
+    text-align: center;
+  }
+  .bday-sub.show { opacity: 1; transform: translateY(0); }
+
+  .overlay-continue {
+    position: absolute;
+    bottom: max(50px, env(safe-area-inset-bottom, 50px));
+    font-size: 13px;
+    letter-spacing: 4px;
+    text-transform: uppercase;
+    color: var(--gold);
+    opacity: 0;
+    animation: ctaPulse 2.5s ease-in-out infinite;
+    transition: opacity 1s ease;
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+    padding: 16px 32px;
+  }
+  .overlay-continue.show { opacity: 1; }
+
+  .scroll-arrow {
+    position: absolute;
+    bottom: max(25px, env(safe-area-inset-bottom, 25px));
+    left: 50%; transform: translateX(-50%);
+    opacity: 0;
+    transition: opacity 1s ease;
+  }
+  .scroll-arrow.show { opacity: 1; }
+
+  .scroll-arrow svg {
+    width: 22px; height: 22px;
+    fill: none; stroke: var(--gold); stroke-width: 2;
+    stroke-linecap: round; stroke-linejoin: round;
+    animation: bounceArrow 1.5s ease-in-out infinite;
+  }
+
+  @keyframes bounceArrow {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(8px); }
+  }
+
+  /* ==================================================================
+     SCREEN 3: EUROPA PARK CALLBACK
+     ================================================================== */
+  .europa-line {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(24px, 7vw, 44px);
+    font-weight: 700;
+    line-height: 1.35;
+    text-align: center;
+    max-width: 600px;
+    opacity: 0;
+    transform: translateY(30px);
+    transition: all 1s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  .europa-line.show { opacity: 1; transform: translateY(0); }
+
+  .europa-line .hl {
+    background: linear-gradient(135deg, var(--gold-light), var(--gold));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .europa-line + .europa-line {
+    margin-top: 24px;
+  }
+
+  .europa-dots {
+    display: flex;
+    gap: 6px;
+    margin: 30px 0;
+    opacity: 0;
+    transition: opacity 0.8s ease;
+  }
+  .europa-dots.show { opacity: 1; }
+
+  .europa-dots span {
+    width: 4px; height: 4px;
+    background: var(--gold);
+    border-radius: 50%;
+    animation: dotBlink 1.5s ease-in-out infinite;
+  }
+  .europa-dots span:nth-child(2) { animation-delay: 0.2s; }
+  .europa-dots span:nth-child(3) { animation-delay: 0.4s; }
+
+  @keyframes dotBlink {
+    0%, 100% { opacity: 0.3; }
+    50% { opacity: 1; }
+  }
+
+  /* ==================================================================
+     MAIN CONTENT
+     ================================================================== */
+  #main-content { display: none; min-height: 100vh; }
+  #main-content.visible { display: block; }
+
+  /* ==================================================================
+     HERO
+     ================================================================== */
+  .hero {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 60px 24px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .hero::before {
+    content: '';
+    position: absolute; inset: 0;
+    background:
+      radial-gradient(ellipse at 30% 40%, rgba(232,185,74,0.06) 0%, transparent 50%),
+      radial-gradient(ellipse at 70% 60%, rgba(108,92,231,0.04) 0%, transparent 50%);
+    pointer-events: none;
+  }
+
+  .hero-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 20px;
+    border-radius: 100px;
+    background: var(--gold-dim);
+    border: 1px solid rgba(232,185,74,0.2);
+    margin-bottom: 32px;
+    opacity: 0;
+    animation: fadeInUp 1s ease 0.2s forwards;
+  }
+
+  .hero-badge-dot {
+    width: 6px; height: 6px;
+    background: var(--gold);
+    border-radius: 50%;
+    animation: badgePulse 2s ease-in-out infinite;
+  }
+
+  @keyframes badgePulse { 0%, 100% { opacity: 0.5; } 50% { opacity: 1; } }
+
+  .hero-badge span {
+    font-size: 12px;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: var(--gold);
+    font-weight: 600;
+  }
+
+  .hero-title {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(40px, 11vw, 80px);
+    font-weight: 900;
+    line-height: 1.1;
+    max-width: 700px;
+    opacity: 0;
+    animation: fadeInUp 1s ease 0.5s forwards;
+    margin-bottom: 16px;
+  }
+
+  .hero-title .hl {
+    background: linear-gradient(135deg, var(--gold-light), var(--gold));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .hero-subtitle {
+    font-size: clamp(16px, 4.5vw, 22px);
+    color: var(--gray);
+    font-weight: 300;
+    line-height: 1.6;
+    max-width: 500px;
+    opacity: 0;
+    animation: fadeInUp 1s ease 0.8s forwards;
+  }
+
+  .hero-divider {
+    width: 50px; height: 2px;
+    background: linear-gradient(90deg, transparent, var(--gold), transparent);
+    margin: 40px auto;
+    opacity: 0;
+    animation: fadeIn 1s ease 1.1s forwards;
+  }
+
+  .hero-location {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    opacity: 0;
+    animation: fadeInUp 1s ease 1.3s forwards;
+  }
+
+  .hero-location svg {
+    width: 18px; height: 18px;
+    stroke: var(--accent); fill: none; stroke-width: 2;
+    flex-shrink: 0;
+  }
+
+  .hero-location span {
+    font-size: 14px;
+    color: var(--gray-light);
+    letter-spacing: 1px;
+  }
+
+  .hero-scroll-hint {
+    position: absolute;
+    bottom: 40px; left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    opacity: 0;
+    animation: fadeIn 1s ease 2s forwards;
+  }
+
+  .hero-scroll-hint span {
+    font-size: 10px;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: var(--gray);
+  }
+
+  .scroll-line {
+    width: 1px; height: 40px;
+    background: linear-gradient(180deg, var(--gold), transparent);
+    animation: scrollLineAnim 2s ease-in-out infinite;
+  }
+
+  @keyframes scrollLineAnim {
+    0% { transform: scaleY(0); transform-origin: top; }
+    50% { transform: scaleY(1); transform-origin: top; }
+    51% { transform-origin: bottom; }
+    100% { transform: scaleY(0); transform-origin: bottom; }
+  }
+
+  @keyframes fadeInUp {
+    from { opacity: 0; transform: translateY(28px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  @keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+
+  /* ==================================================================
+     SECTIONS
+     ================================================================== */
+  .section {
+    padding: 100px 24px;
+    max-width: 720px;
+    margin: 0 auto;
+  }
+
+  .section-label {
+    font-size: 11px;
+    letter-spacing: 5px;
+    text-transform: uppercase;
+    color: var(--gold);
+    font-weight: 600;
+    margin-bottom: 14px;
+  }
+
+  .section-title {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(30px, 8vw, 48px);
+    font-weight: 800;
+    line-height: 1.15;
+    margin-bottom: 18px;
+  }
+
+  .section-text {
+    font-size: clamp(15px, 3.8vw, 17px);
+    line-height: 1.75;
+    color: var(--gray);
+    font-weight: 300;
+    margin-bottom: 40px;
+  }
+
+  .sep { width: 100%; max-width: 720px; margin: 0 auto; padding: 0 24px; }
+  .sep-line { height: 1px; background: linear-gradient(90deg, transparent, rgba(232,185,74,0.15), transparent); }
+
+  /* ==================================================================
+     MAP
+     ================================================================== */
+  .map-wrapper {
+    position: relative;
+    width: 100%;
+    border-radius: var(--radius);
+    overflow: hidden;
+    margin-bottom: 40px;
+    border: 1px solid rgba(232,185,74,0.1);
+  }
+
+  #map { width: 100%; height: 420px; background: var(--bg-card); }
+  @media (max-width: 480px) { #map { height: 340px; } }
+
+  .leaflet-container { background: var(--bg-card) !important; }
+  .leaflet-control-zoom { display: none !important; }
+  .leaflet-control-attribution {
+    background: rgba(6,5,10,0.8) !important;
+    color: var(--gray) !important;
+    font-size: 9px !important;
+  }
+  .leaflet-control-attribution a { color: var(--gray) !important; }
+
+  .custom-marker { background: none; border: none; }
+
+  .marker-dot { position: relative; width: 16px; height: 16px; }
+
+  .marker-dot::before {
+    content: '';
+    position: absolute; inset: 0;
+    border-radius: 50%;
+    background: var(--gold);
+    box-shadow: 0 0 16px rgba(232,185,74,0.5);
+  }
+  .marker-dot::after {
+    content: '';
+    position: absolute; inset: -6px;
+    border-radius: 50%;
+    border: 2px solid var(--gold);
+    opacity: 0.4;
+    animation: markerPing 2s ease-out infinite;
+  }
+
+  .marker-dot.accent::before { background: var(--accent); box-shadow: 0 0 16px rgba(255,107,61,0.5); }
+  .marker-dot.accent::after { border-color: var(--accent); }
+
+  @keyframes markerPing {
+    0% { transform: scale(1); opacity: 0.4; }
+    100% { transform: scale(2.5); opacity: 0; }
+  }
+
+  .marker-label {
+    position: absolute;
+    top: 22px; left: 50%;
+    transform: translateX(-50%);
+    white-space: nowrap;
+    font-family: 'Inter', sans-serif;
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--white);
+    text-shadow: 0 2px 8px rgba(0,0,0,0.8);
+  }
+
+  .marker-sub {
+    font-weight: 400;
+    color: var(--gray);
+    font-size: 9px;
+    display: block;
+    text-align: center;
+    margin-top: 1px;
+  }
+
+  /* Route info */
+  .route-info {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    margin-bottom: 60px;
+  }
+
+  .route-card {
+    background: var(--bg-card);
+    border-radius: var(--radius-sm);
+    padding: 22px 16px;
+    border: 1px solid rgba(255,255,255,0.04);
+    text-align: center;
+    opacity: 0;
+    transform: translateY(20px);
+    transition: all 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  .route-card.visible { opacity: 1; transform: translateY(0); }
+
+  .route-card-icon { font-size: 20px; margin-bottom: 10px; display: block; }
+
+  .route-card-value {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(24px, 5vw, 30px);
+    font-weight: 800;
+    color: var(--gold);
+    margin-bottom: 4px;
+  }
+
+  .route-card-label {
+    font-size: 11px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--gray);
+    font-weight: 500;
+  }
+
+  /* ==================================================================
+     TIMELINE
+     ================================================================== */
+  .timeline { position: relative; padding-left: 32px; }
+
+  .timeline::before {
+    content: '';
+    position: absolute;
+    left: 7px; top: 0; bottom: 0;
+    width: 2px;
+    background: linear-gradient(180deg, var(--gold), rgba(232,185,74,0.1));
+  }
+
+  .timeline-item {
+    position: relative;
+    margin-bottom: 40px;
+    opacity: 0;
+    transform: translateY(20px);
+    transition: all 0.7s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  .timeline-item.visible { opacity: 1; transform: translateY(0); }
+  .timeline-item:last-child { margin-bottom: 0; }
+
+  .timeline-dot {
+    position: absolute;
+    left: -29px; top: 4px;
+    width: 12px; height: 12px;
+    border-radius: 50%;
+    background: var(--gold);
+    border: 3px solid var(--bg);
+    box-shadow: 0 0 0 2px var(--gold);
+  }
+
+  .timeline-time {
+    font-size: 12px; color: var(--gold);
+    font-weight: 600; letter-spacing: 2px;
+    text-transform: uppercase; margin-bottom: 6px;
+  }
+  .timeline-title { font-size: 18px; font-weight: 600; margin-bottom: 6px; }
+  .timeline-desc { font-size: 14px; color: var(--gray); line-height: 1.6; font-weight: 300; }
+
+  /* ==================================================================
+     ATTRACTION CARDS WITH IMAGE AREAS
+     ================================================================== */
+  .attraction-card {
+    background: var(--bg-card);
+    border-radius: var(--radius);
+    overflow: hidden;
+    border: 1px solid rgba(255,255,255,0.04);
+    margin-bottom: 16px;
+    opacity: 0;
+    transform: translateY(24px);
+    transition: all 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  .attraction-card.visible { opacity: 1; transform: translateY(0); }
+
+  .attraction-img {
+    width: 100%;
+    height: 200px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .attraction-img img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+
+  .attraction-img-overlay {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(180deg, transparent 40%, rgba(6,5,10,0.85) 100%);
+    pointer-events: none;
+  }
+
+  .attraction-body {
+    padding: 24px;
+  }
+
+  .attraction-name {
+    font-family: 'Playfair Display', serif;
+    font-size: 22px;
+    font-weight: 800;
+    margin-bottom: 8px;
+  }
+
+  .attraction-desc {
+    font-size: 14px;
+    color: var(--gray);
+    line-height: 1.6;
+    font-weight: 300;
+  }
+
+  .attraction-tags {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+    margin-top: 12px;
+  }
+
+  .tag {
+    display: inline-block;
+    font-size: 10px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    padding: 3px 10px;
+    border-radius: 6px;
+    font-weight: 600;
+  }
+
+  .tag-thrill { background: rgba(231,76,60,0.12); color: #e74c3c; }
+  .tag-unique { background: rgba(108,92,231,0.12); color: #6c5ce7; }
+  .tag-explore { background: rgba(46,204,113,0.12); color: #2ecc71; }
+  .tag-chill { background: rgba(52,152,219,0.12); color: #3498db; }
+  .tag-record { background: rgba(232,185,74,0.12); color: var(--gold); }
+
+  /* Attraction stat inline */
+  .attraction-stat {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 12px;
+    color: var(--gold);
+    font-weight: 600;
+    margin-top: 10px;
+    margin-right: 16px;
+  }
+
+  /* ==================================================================
+     FACTS
+     ================================================================== */
+  .facts-strip {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+    margin-top: 50px;
+  }
+  @media (max-width: 480px) { .facts-strip { grid-template-columns: 1fr; } }
+
+  .fact-card {
+    background: var(--bg-card);
+    border-radius: var(--radius-sm);
+    padding: 24px 20px;
+    border: 1px solid rgba(255,255,255,0.04);
+    text-align: center;
+    opacity: 0; transform: translateY(20px);
+    transition: all 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  .fact-card.visible { opacity: 1; transform: translateY(0); }
+
+  .fact-value {
+    font-family: 'Playfair Display', serif;
+    font-size: 36px; font-weight: 800;
+    color: var(--gold);
+    margin-bottom: 6px;
+  }
+
+  .fact-label {
+    font-size: 13px; color: var(--gray);
+    font-weight: 400; line-height: 1.4;
+  }
+
+  /* ==================================================================
+     HIGHLIGHT QUOTE
+     ================================================================== */
+  .highlight-section {
+    text-align: center;
+    padding: 100px 24px;
+    max-width: 720px;
+    margin: 0 auto;
+  }
+
+  .highlight-quote {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(26px, 7vw, 42px);
+    font-weight: 700;
+    font-style: italic;
+    line-height: 1.35;
+    opacity: 0; transform: translateY(20px);
+    transition: all 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  .highlight-quote.visible { opacity: 1; transform: translateY(0); }
+  .highlight-quote .hl { color: var(--gold); font-style: normal; }
+
+  .highlight-sub {
+    margin-top: 20px;
+    font-size: 14px; color: var(--gray);
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    opacity: 0; transform: translateY(14px);
+    transition: all 0.8s cubic-bezier(0.16, 1, 0.3, 1) 0.2s;
+  }
+  .highlight-sub.visible { opacity: 1; transform: translateY(0); }
+
+  /* ==================================================================
+     COLOGNE SECTION - City card
+     ================================================================== */
+  .city-card {
+    background: var(--bg-card);
+    border-radius: var(--radius);
+    overflow: hidden;
+    border: 1px solid rgba(255,255,255,0.04);
+    margin-bottom: 20px;
+    opacity: 0; transform: translateY(24px);
+    transition: all 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  .city-card.visible { opacity: 1; transform: translateY(0); }
+
+  .city-img {
+    width: 100%; height: 220px;
+    position: relative; overflow: hidden;
+  }
+
+  .city-img img {
+    width: 100%; height: 100%;
+    object-fit: cover; display: block;
+  }
+
+  .city-img-overlay {
+    position: absolute; inset: 0;
+    background: linear-gradient(180deg, transparent 30%, rgba(6,5,10,0.9) 100%);
+    pointer-events: none;
+  }
+
+  .city-body { padding: 24px; }
+
+  .city-name {
+    font-family: 'Playfair Display', serif;
+    font-size: 24px; font-weight: 800;
+    margin-bottom: 10px;
+  }
+
+  .city-desc {
+    font-size: 14px; color: var(--gray);
+    line-height: 1.65; font-weight: 300;
+    margin-bottom: 16px;
+  }
+
+  .city-things {
+    list-style: none;
+    padding: 0;
+  }
+
+  .city-things li {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    padding: 10px 0;
+    border-top: 1px solid rgba(255,255,255,0.04);
+    font-size: 14px;
+    color: var(--gray-light);
+    font-weight: 400;
+  }
+
+  .city-things li span.ct-icon {
+    font-size: 18px;
+    flex-shrink: 0;
+    margin-top: 0;
+  }
+
+  .city-things li strong {
+    color: var(--white);
+    font-weight: 600;
+  }
+
+  /* ==================================================================
+     FOOTER
+     ================================================================== */
+  .footer {
+    text-align: center;
+    padding: 80px 24px 80px;
+    max-width: 720px;
+    margin: 0 auto;
+  }
+
+  .footer-divider {
+    width: 60px; height: 2px;
+    background: var(--gold);
+    margin: 0 auto 40px;
+    opacity: 0;
+    transition: opacity 0.8s ease;
+  }
+  .footer-divider.visible { opacity: 1; }
+
+  .footer-msg {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(26px, 7vw, 40px);
+    font-weight: 700;
+    line-height: 1.3;
+    margin-bottom: 24px;
+    opacity: 0; transform: translateY(20px);
+    transition: all 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  .footer-msg.visible { opacity: 1; transform: translateY(0); }
+
+  .footer-from {
+    font-size: 15px; color: var(--gold);
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    opacity: 0;
+    transition: all 0.8s ease 0.2s;
+  }
+  .footer-from.visible { opacity: 1; }
+
+  .footer-emoji {
+    font-size: 40px;
+    margin-top: 32px;
+    display: inline-block;
+    animation: fistBump 2s ease-in-out infinite;
+  }
+
+  @keyframes fistBump {
+    0%, 100% { transform: rotate(0deg) scale(1); }
+    25% { transform: rotate(-10deg) scale(1.1); }
+    50% { transform: rotate(0deg) scale(1); }
+    75% { transform: rotate(10deg) scale(1.05); }
+  }
+
+  /* Scroll reveal utility */
+  .reveal {
+    opacity: 0; transform: translateY(30px);
+    transition: all 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  .reveal.visible { opacity: 1; transform: translateY(0); }
+
+  /* ==================================================================
+     CALENDAR / DATE PICKER
+     ================================================================== */
+  .cal-intro {
+    font-size: clamp(15px, 3.8vw, 17px);
+    line-height: 1.75;
+    color: var(--gray);
+    font-weight: 300;
+    margin-bottom: 12px;
+  }
+
+  .cal-hint {
+    font-size: 13px;
+    color: var(--gold);
+    margin-bottom: 32px;
+    font-weight: 500;
+    letter-spacing: 0.5px;
+  }
+
+  .cal-legend {
+    display: flex;
+    gap: 16px;
+    flex-wrap: wrap;
+    margin-bottom: 28px;
+  }
+
+  .cal-legend-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 11px;
+    color: var(--gray);
+    letter-spacing: 0.5px;
+  }
+
+  .cal-legend-dot {
+    width: 10px; height: 10px;
+    border-radius: 50%;
+  }
+
+  .cal-legend-dot.l1 { background: #2ecc71; }
+  .cal-legend-dot.l2 { background: #f1c40f; }
+  .cal-legend-dot.l3 { background: #e67e22; }
+  .cal-legend-dot.l4 { background: #e74c3c; }
+  .cal-legend-dot.rec { background: transparent; border: 2px solid var(--gold); }
+
+  .cal-month-grid {
+    margin-bottom: 32px;
+  }
+
+  .cal-month-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 20px;
+    font-weight: 700;
+    margin-bottom: 12px;
+    color: var(--white);
+  }
+
+  .cal-grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 4px;
+  }
+
+  .cal-header {
+    font-size: 10px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    color: var(--gray);
+    text-align: center;
+    padding: 6px 0;
+    font-weight: 600;
+  }
+
+  .cal-day {
+    position: relative;
+    aspect-ratio: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    border-radius: 10px;
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--gray);
+    background: transparent;
+    cursor: default;
+    transition: all 0.2s ease;
+    border: 2px solid transparent;
+  }
+
+  .cal-day.empty { pointer-events: none; }
+
+  .cal-day.weekend {
+    color: rgba(138,134,148,0.3);
+  }
+
+  .cal-day.past {
+    color: rgba(138,134,148,0.2);
+  }
+
+  .cal-day.closed {
+    color: rgba(138,134,148,0.2);
+  }
+
+  .cal-day.selectable {
+    color: var(--white);
+    cursor: pointer;
+    background: var(--bg-card);
+    border: 1px solid rgba(255,255,255,0.06);
+  }
+
+  .cal-day.selectable:hover {
+    background: rgba(232,185,74,0.08);
+    border-color: rgba(232,185,74,0.2);
+  }
+
+  .cal-day.recommended {
+    border: 2px solid rgba(232,185,74,0.4) !important;
+  }
+
+  .cal-day.selected-arrival {
+    background: rgba(108,92,231,0.2) !important;
+    border-color: var(--purple) !important;
+    color: var(--white) !important;
+  }
+
+  .cal-day.selected-park {
+    background: rgba(232,185,74,0.15) !important;
+    border-color: var(--gold) !important;
+    color: var(--gold) !important;
+    font-weight: 700;
+  }
+
+  .cal-crowd-dot {
+    width: 5px; height: 5px;
+    border-radius: 50%;
+    margin-top: 3px;
+  }
+
+  .crowd-1 { background: #2ecc71; }
+  .crowd-2 { background: #a8e06e; }
+  .crowd-3 { background: #f1c40f; }
+  .crowd-4 { background: #e67e22; }
+  .crowd-5 { background: #e74c3c; }
+
+  /* Selection detail panel */
+  .cal-detail {
+    background: var(--bg-card);
+    border-radius: var(--radius);
+    border: 1px solid rgba(232,185,74,0.15);
+    padding: 28px 24px;
+    margin-top: 24px;
+    display: none;
+    animation: fadeInUp 0.5s ease forwards;
+  }
+
+  .cal-detail.visible { display: block; }
+
+  .cal-detail-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 22px;
+    font-weight: 800;
+    margin-bottom: 20px;
+    color: var(--gold);
+  }
+
+  .cal-detail-row {
+    display: flex;
+    align-items: flex-start;
+    gap: 14px;
+    padding: 14px 0;
+    border-top: 1px solid rgba(255,255,255,0.04);
+  }
+
+  .cal-detail-icon {
+    width: 40px; height: 40px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+    flex-shrink: 0;
+  }
+
+  .cal-detail-icon.train { background: rgba(108,92,231,0.12); }
+  .cal-detail-icon.park { background: rgba(232,185,74,0.12); }
+  .cal-detail-icon.return { background: rgba(255,107,61,0.12); }
+
+  .cal-detail-info { flex: 1; }
+
+  .cal-detail-day {
+    font-size: 13px;
+    font-weight: 700;
+    margin-bottom: 3px;
+    color: var(--white);
+  }
+
+  .cal-detail-meta {
+    font-size: 12px;
+    color: var(--gray);
+    line-height: 1.5;
+  }
+
+  .cal-detail-crowd {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 11px;
+    font-weight: 600;
+    padding: 2px 8px;
+    border-radius: 6px;
+    margin-top: 6px;
+  }
+
+  .cal-detail-crowd.c1 { background: rgba(46,204,113,0.12); color: #2ecc71; }
+  .cal-detail-crowd.c2 { background: rgba(168,224,110,0.12); color: #a8e06e; }
+  .cal-detail-crowd.c3 { background: rgba(241,196,15,0.12); color: #f1c40f; }
+  .cal-detail-crowd.c4 { background: rgba(230,126,34,0.12); color: #e67e22; }
+  .cal-detail-crowd.c5 { background: rgba(231,76,60,0.12); color: #e74c3c; }
+
+  .cal-rec-banner {
+    margin-top: 20px;
+    padding: 16px 20px;
+    background: rgba(232,185,74,0.06);
+    border: 1px solid rgba(232,185,74,0.15);
+    border-radius: var(--radius-sm);
+    font-size: 13px;
+    color: var(--gray-light);
+    line-height: 1.6;
+  }
+
+  .cal-rec-banner strong { color: var(--gold); }
+
+  @media (max-width: 480px) {
+    .cal-day { font-size: 12px; border-radius: 8px; }
+    .cal-crowd-dot { width: 4px; height: 4px; margin-top: 2px; }
+    .cal-detail { padding: 20px 18px; }
+  }
+
+  /* ==================================================================
+     ENHANCED GIFT ANIMATIONS
+     ================================================================== */
+  .gift-shimmer {
+    position: absolute; inset: 0; z-index: 1;
+    background: linear-gradient(105deg, transparent 40%, rgba(255,255,255,0.06) 45%, rgba(255,255,255,0.12) 50%, rgba(255,255,255,0.06) 55%, transparent 60%);
+    background-size: 200% 100%;
+    animation: shimmerSweep 4s ease-in-out infinite;
+    pointer-events: none;
+  }
+  @keyframes shimmerSweep {
+    0% { background-position: 200% 0; }
+    100% { background-position: -200% 0; }
+  }
+
+  .ribbon-strip { animation: ribbonShine 3s ease-in-out infinite; }
+  @keyframes ribbonShine {
+    0%, 100% { filter: brightness(1); }
+    50% { filter: brightness(1.2); }
+  }
+
+  .bow-wrap { animation: bowBreathe 3s ease-in-out infinite; }
+  @keyframes bowBreathe {
+    0%, 100% { transform: translate(-50%, -50%) scale(1); }
+    50% { transform: translate(-50%, -50%) scale(1.06); }
+  }
+
+  .gift-star {
+    position: absolute; z-index: 3; pointer-events: none;
+    color: var(--gold-light); font-size: 12px;
+    animation: starTwinkle 2.5s ease-in-out infinite;
+  }
+  @keyframes starTwinkle {
+    0%, 100% { opacity: 0; transform: scale(0) rotate(0deg); }
+    50% { opacity: 1; transform: scale(1) rotate(180deg); }
+  }
+
+  .gift-ring {
+    position: absolute; z-index: 1; pointer-events: none;
+    border: 1px solid rgba(232,185,74,0.15);
+    border-radius: 50%;
+    animation: ringExpand 5s ease-out infinite;
+  }
+  @keyframes ringExpand {
+    0% { transform: translate(-50%,-50%) scale(0.3); opacity: 0.6; }
+    100% { transform: translate(-50%,-50%) scale(3); opacity: 0; }
+  }
+
+  .wrap-edge-glow {
+    position: absolute; z-index: 0; pointer-events: none;
+  }
+  .wrap-edge-glow.top { top: 0; left: 0; right: 0; height: 80px; background: linear-gradient(180deg, rgba(232,185,74,0.06), transparent); }
+  .wrap-edge-glow.bottom { bottom: 0; left: 0; right: 0; height: 80px; background: linear-gradient(0deg, rgba(232,185,74,0.06), transparent); }
+  .wrap-edge-glow.left { top: 0; bottom: 0; left: 0; width: 60px; background: linear-gradient(90deg, rgba(232,185,74,0.04), transparent); }
+  .wrap-edge-glow.right { top: 0; bottom: 0; right: 0; width: 60px; background: linear-gradient(270deg, rgba(232,185,74,0.04), transparent); }
+
+  /* ==================================================================
+     SCROLL ANIMATIONS
+     ================================================================== */
+  .reveal-left {
+    opacity: 0; transform: translateX(-60px);
+    transition: all 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  .reveal-left.visible { opacity: 1; transform: translateX(0); }
+
+  .reveal-right {
+    opacity: 0; transform: translateX(60px);
+    transition: all 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  .reveal-right.visible { opacity: 1; transform: translateX(0); }
+
+  .reveal-scale {
+    opacity: 0; transform: scale(0.85);
+    transition: all 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  .reveal-scale.visible { opacity: 1; transform: scale(1); }
+
+  /* Floating decorative elements */
+  .bg-decor {
+    position: fixed; pointer-events: none; z-index: -1;
+    opacity: 0.04;
+    transition: transform 0.1s linear;
+  }
+  .bg-decor-circle {
+    border-radius: 50%;
+    border: 1.5px solid var(--gold);
+  }
+  .bg-decor-diamond {
+    border: 1.5px solid var(--gold);
+    transform: rotate(45deg);
+  }
+  .bg-decor-dot {
+    border-radius: 50%;
+    background: var(--gold);
+  }
+  .bg-decor-cross {
+    position: relative;
+  }
+  .bg-decor-cross::before, .bg-decor-cross::after {
+    content: ''; position: absolute;
+    background: var(--gold);
+  }
+  .bg-decor-cross::before { width: 100%; height: 1.5px; top: 50%; left: 0; transform: translateY(-50%); }
+  .bg-decor-cross::after { width: 1.5px; height: 100%; left: 50%; top: 0; transform: translateX(-50%); }
+
+  /* Records strip */
+  .records-strip {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+    margin-top: 32px;
+  }
+  .record-card {
+    background: var(--bg-card);
+    border-radius: var(--radius-sm);
+    padding: 20px 16px;
+    border: 1px solid rgba(232,185,74,0.08);
+    text-align: center;
+    opacity: 0; transform: translateY(20px);
+    transition: all 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  .record-card.visible { opacity: 1; transform: translateY(0); }
+  .record-icon { font-size: 24px; margin-bottom: 8px; }
+  .record-value {
+    font-family: 'Playfair Display', serif;
+    font-size: 20px; font-weight: 800;
+    color: var(--gold); margin-bottom: 4px;
+  }
+  .record-label { font-size: 11px; color: var(--gray); line-height: 1.4; letter-spacing: 0.5px; }
+
+  /* Comparison callouts */
+  .comparison-note {
+    margin-top: 12px;
+    padding: 10px 14px;
+    background: rgba(108,92,231,0.06);
+    border-left: 3px solid var(--purple);
+    border-radius: 0 8px 8px 0;
+    font-size: 12px;
+    color: var(--gray-light);
+    line-height: 1.5;
+  }
+  .comparison-note strong { color: var(--purple); font-weight: 600; }
+
+  /* Counter animation */
+  .counter-val {
+    display: inline-block;
+  }
+
+  /* ==================================================================
+     RESPONSIVE
+     ================================================================== */
+  @media (max-width: 480px) {
+    .section { padding: 70px 20px; }
+    .highlight-section { padding: 70px 20px; }
+    .bow-wrap { width: 110px; height: 80px; }
+    .bow-loop-wrap { width: 48px; height: 36px; }
+    .bow-center-wrap { width: 26px; height: 26px; }
+    .ribbon-v { width: 36px; }
+    .ribbon-h { height: 36px; }
+    .bday-age::after { right: -30px; }
+    .attraction-img { height: 170px; }
+    .city-img { height: 180px; }
+    .records-strip { grid-template-columns: 1fr 1fr; gap: 8px; }
+    .record-card { padding: 14px 10px; }
+    .record-value { font-size: 16px; }
+    .bg-decor { display: none; }
+  }
+</style>
+</head>
+<body>
+
+<!-- Light burst -->
+<div class="light-burst" id="lightBurst"></div>
+<!-- Confetti -->
+<canvas id="confetti-canvas"></canvas>
+
+<!-- ======== SCREEN 1: FULL-SCREEN GIFT WRAP ======== -->
+<div id="gift-screen" onclick="startUnwrap()">
+  <div class="wrap-bg"></div>
+  <div class="wrap-pattern"></div>
+  <div class="gift-shimmer"></div>
+  <div class="gift-ambient"></div>
+
+  <div class="wrap-edge-glow top"></div>
+  <div class="wrap-edge-glow bottom"></div>
+  <div class="wrap-edge-glow left"></div>
+  <div class="wrap-edge-glow right"></div>
+
+  <div class="gift-sparkle" style="top:15%;left:20%;animation-delay:0s;animation-duration:3.2s"></div>
+  <div class="gift-sparkle" style="top:30%;left:75%;animation-delay:0.8s;animation-duration:2.8s"></div>
+  <div class="gift-sparkle" style="top:60%;left:15%;animation-delay:1.4s;animation-duration:3.5s"></div>
+  <div class="gift-sparkle" style="top:70%;left:80%;animation-delay:0.3s;animation-duration:3s"></div>
+  <div class="gift-sparkle" style="top:45%;left:35%;animation-delay:2s;animation-duration:2.6s"></div>
+  <div class="gift-sparkle" style="top:80%;left:55%;animation-delay:1s;animation-duration:3.3s"></div>
+  <div class="gift-sparkle" style="top:20%;left:50%;animation-delay:1.8s;animation-duration:2.9s"></div>
+  <div class="gift-sparkle" style="top:55%;left:60%;animation-delay:0.5s;animation-duration:3.1s"></div>
+  <div class="gift-sparkle" style="top:10%;left:45%;animation-delay:2.3s;animation-duration:2.7s"></div>
+  <div class="gift-sparkle" style="top:85%;left:30%;animation-delay:0.7s;animation-duration:3.4s"></div>
+  <div class="gift-sparkle" style="top:40%;left:90%;animation-delay:1.6s;animation-duration:2.5s"></div>
+  <div class="gift-sparkle" style="top:75%;left:10%;animation-delay:2.1s;animation-duration:3.6s"></div>
+
+  <div class="gift-star" style="top:12%;left:25%;animation-delay:0.5s;animation-duration:3s">&#10022;</div>
+  <div class="gift-star" style="top:22%;left:70%;animation-delay:1.5s;animation-duration:2.8s">&#10022;</div>
+  <div class="gift-star" style="top:65%;left:18%;animation-delay:2.2s;animation-duration:3.2s">&#10022;</div>
+  <div class="gift-star" style="top:78%;left:75%;animation-delay:0.8s;animation-duration:2.6s">&#10022;</div>
+  <div class="gift-star" style="top:35%;left:85%;animation-delay:1.8s;animation-duration:3.4s;font-size:8px">&#10022;</div>
+  <div class="gift-star" style="top:88%;left:42%;animation-delay:2.5s;animation-duration:2.9s;font-size:8px">&#10022;</div>
+
+  <div class="gift-ring" style="top:50%;left:50%;width:200px;height:200px;animation-delay:0s"></div>
+  <div class="gift-ring" style="top:50%;left:50%;width:200px;height:200px;animation-delay:1.7s"></div>
+  <div class="gift-ring" style="top:50%;left:50%;width:200px;height:200px;animation-delay:3.4s"></div>
+
+  <div class="ribbon-strip ribbon-v"></div>
+  <div class="ribbon-strip ribbon-h"></div>
+
+  <div class="bow-wrap">
+    <div class="bow-loop-wrap l"></div>
+    <div class="bow-loop-wrap r"></div>
+    <div class="bow-tail l"></div>
+    <div class="bow-tail r"></div>
+    <div class="bow-center-wrap"></div>
+  </div>
+
+  <div class="gift-msg">
+    <div class="gift-msg-text">Un cadeau t'attend...</div>
+  </div>
+
+  <div class="gift-signature">
+    <span>&mdash; Hildou</span>
+  </div>
+
+  <div class="gift-cta">
+    <span>Appuie pour ouvrir</span>
+  </div>
+</div>
+
+<!-- ======== SCREEN 2: BIRTHDAY ======== -->
+<div id="birthday-screen" class="overlay-screen">
+  <div class="bday-particles" id="bdayParticles"></div>
+  <div class="bday-pre" id="bdayPre">Joyeux Anniversaire</div>
+  <div class="bday-name" id="bdayName">Max</div>
+  <div class="bday-age" id="bdayAge">28</div>
+  <div class="bday-sub" id="bdaySub">J'ai quelque chose pour toi</div>
+  <div class="overlay-continue" id="bdayContinue" onclick="showEuropaScreen()">Continuer</div>
+  <div class="scroll-arrow" id="scrollArrow">
+    <svg viewBox="0 0 24 24"><path d="M12 5v14M5 12l7 7 7-7"/></svg>
+  </div>
+</div>
+
+<!-- ======== SCREEN 3: EUROPA PARK CALLBACK ======== -->
+<div id="europa-screen" class="overlay-screen">
+  <div class="europa-line" id="europaLine1">En 2024, on a fait le <span class="hl">Parc Ast&eacute;rix</span>.</div>
+  <div class="europa-line" id="europaLine2">En 2025, on a fait <span class="hl">Europa Park</span>.</div>
+  <div class="europa-dots" id="europaDots"><span></span><span></span><span></span></div>
+  <div class="europa-line" id="europaLine3">Et en 2026, on <span class="hl">repart</span>...</div>
+  <div class="overlay-continue" id="europaContinue" onclick="revealGift()">D&eacute;couvrir</div>
+  <div class="scroll-arrow" id="europaArrow">
+    <svg viewBox="0 0 24 24"><path d="M12 5v14M5 12l7 7 7-7"/></svg>
+  </div>
+</div>
+
+<!-- ======== MAIN CONTENT ======== -->
+<div id="main-content">
+
+  <!-- Floating background decorations -->
+  <div class="bg-decor bg-decor-circle" style="width:80px;height:80px;top:15%;left:5%" data-speed="0.02"></div>
+  <div class="bg-decor bg-decor-diamond" style="width:20px;height:20px;top:25%;right:8%" data-speed="0.035"></div>
+  <div class="bg-decor bg-decor-dot" style="width:6px;height:6px;top:40%;left:10%" data-speed="0.025"></div>
+  <div class="bg-decor bg-decor-circle" style="width:40px;height:40px;top:55%;right:6%" data-speed="0.03"></div>
+  <div class="bg-decor bg-decor-cross" style="width:16px;height:16px;top:70%;left:7%" data-speed="0.04"></div>
+  <div class="bg-decor bg-decor-dot" style="width:4px;height:4px;top:85%;right:12%" data-speed="0.02"></div>
+  <div class="bg-decor bg-decor-diamond" style="width:14px;height:14px;top:120%;left:4%" data-speed="0.03"></div>
+  <div class="bg-decor bg-decor-circle" style="width:50px;height:50px;top:150%;right:5%" data-speed="0.025"></div>
+  <div class="bg-decor bg-decor-cross" style="width:12px;height:12px;top:180%;left:9%" data-speed="0.035"></div>
+  <div class="bg-decor bg-decor-dot" style="width:5px;height:5px;top:200%;right:7%" data-speed="0.02"></div>
+
+  <!-- HERO -->
+  <section class="hero">
+    <div class="hero-badge">
+      <div class="hero-badge-dot"></div>
+      <span>Ton cadeau</span>
+    </div>
+    <h1 class="hero-title">
+      2 jours &agrave;<br><span class="hl">Phantasialand</span>
+    </h1>
+    <p class="hero-subtitle">
+      Un des parcs &agrave; sensations fortes les plus r&eacute;put&eacute;s d'Europe.
+      Deux jours de folie en Allemagne, c'est ton cadeau.
+    </p>
+    <div class="hero-divider"></div>
+    <div class="hero-location">
+      <svg viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+      <span>Br&uuml;hl, Allemagne &mdash; pr&egrave;s de Cologne</span>
+    </div>
+    <div class="hero-scroll-hint">
+      <span>D&eacute;couvrir</span>
+      <div class="scroll-line"></div>
+    </div>
+  </section>
+
+  <div class="sep"><div class="sep-line"></div></div>
+
+  <!-- LE VOYAGE -->
+  <section class="section">
+    <div class="reveal">
+      <div class="section-label">Le Voyage</div>
+      <div class="section-title">Paris &rarr; Phantasialand</div>
+      <div class="section-text">
+        Thalys depuis Paris Gare du Nord direction Bruxelles,
+        puis un train jusqu'&agrave; Cologne et un petit trajet jusqu'&agrave; Br&uuml;hl.
+        &Agrave; travers la Belgique et l'Allemagne, direction un autre monde.
+      </div>
+    </div>
+
+    <div class="map-wrapper reveal" id="mapWrapper">
+      <div id="map"></div>
+    </div>
+
+    <div class="route-info">
+      <div class="route-card" data-delay="0">
+        <div class="route-card-icon">&#128646;</div>
+        <div class="route-card-value">~4h</div>
+        <div class="route-card-label">En train</div>
+      </div>
+      <div class="route-card" data-delay="100">
+        <div class="route-card-icon">&#127906;</div>
+        <div class="route-card-value">2</div>
+        <div class="route-card-label">Jours</div>
+      </div>
+    </div>
+  </section>
+
+  <div class="sep"><div class="sep-line"></div></div>
+
+  <!-- LE PROGRAMME -->
+  <section class="section">
+    <div class="reveal">
+      <div class="section-label">Le Programme</div>
+      <div class="section-title">Comment &ccedil;a se passe</div>
+      <div class="section-text">
+        D&eacute;part le soir en train, nuit sur place, deux journ&eacute;es compl&egrave;tes au parc,
+        et retour le deuxi&egrave;me soir dans le dernier train.
+      </div>
+    </div>
+
+    <div class="timeline">
+      <div class="timeline-item" data-delay="0">
+        <div class="timeline-dot"></div>
+        <div class="timeline-time">La veille &mdash; Soir</div>
+        <div class="timeline-title">Train de Paris &agrave; Cologne</div>
+        <div class="timeline-desc">
+          Train en fin de journ&eacute;e depuis la Gare du Nord.
+          Arriv&eacute;e le soir, direction l'h&ocirc;tel/Airbnb &agrave; Br&uuml;hl.
+          Bonne nuit de sommeil pour &ecirc;tre frais le lendemain.
+        </div>
+      </div>
+      <div class="timeline-item" data-delay="100">
+        <div class="timeline-dot"></div>
+        <div class="timeline-time">Jour 1 &mdash; Journ&eacute;e enti&egrave;re</div>
+        <div class="timeline-title">Premier jour au parc</div>
+        <div class="timeline-desc">
+          D&egrave;s l'ouverture : Taron, F.L.Y., Black Mamba...
+          Coasters toute la journ&eacute;e. Le soir, le parc &eacute;clair&eacute; de nuit,
+          resto sur place, puis retour &agrave; l'h&ocirc;tel.
+        </div>
+      </div>
+      <div class="timeline-item" data-delay="200">
+        <div class="timeline-dot"></div>
+        <div class="timeline-time">Jour 2 &mdash; Journ&eacute;e enti&egrave;re</div>
+        <div class="timeline-title">Deuxi&egrave;me jour &amp; d&eacute;part</div>
+        <div class="timeline-desc">
+          Refaire les meilleures attractions, explorer les mondes th&eacute;matiques,
+          Chiapas, Mystery Castle... En fin de journ&eacute;e, dernier
+          train retour &agrave; Paris. Claqu&eacute; mais content.
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <div class="sep"><div class="sep-line"></div></div>
+
+  <!-- CHOISIS TES DATES -->
+  <section class="section" id="dateSection">
+    <div class="reveal">
+      <div class="section-label">&Agrave; toi de jouer</div>
+      <div class="section-title">Choisis tes dates</div>
+      <div class="cal-intro">
+        Choisis <strong>2 jours de semaine</strong> qui t'arrangent d'ici fin juillet.
+        Clique sur le premier jour de parc &mdash; le reste se calcule automatiquement
+        (arriv&eacute;e la veille au soir, 2 jours de parc, d&eacute;part le 2e soir).
+      </div>
+      <div class="cal-hint">&#128161; Les jours encadr&eacute;s en or sont recommand&eacute;s (moins de monde)</div>
+    </div>
+
+    <div class="reveal">
+      <div class="cal-legend">
+        <div class="cal-legend-item"><div class="cal-legend-dot l1"></div> Tr&egrave;s calme</div>
+        <div class="cal-legend-item"><div class="cal-legend-dot l2"></div> Calme</div>
+        <div class="cal-legend-item"><div class="cal-legend-dot l3"></div> Mod&eacute;r&eacute;</div>
+        <div class="cal-legend-item"><div class="cal-legend-dot l4"></div> Fr&eacute;quent&eacute;</div>
+        <div class="cal-legend-item"><div class="cal-legend-dot rec"></div> Recommand&eacute;</div>
+      </div>
+    </div>
+
+    <div id="calendarContainer" class="reveal"></div>
+
+    <div class="cal-detail" id="calDetail">
+      <div class="cal-detail-title" id="calDetailTitle"></div>
+      <div id="calDetailRows"></div>
+    </div>
+
+    <div class="cal-rec-banner reveal" style="margin-top:30px">
+      <strong>&#127775; Nos recommandations :</strong> Les mardis et mercredis hors vacances scolaires sont
+      les jours les plus calmes. Vise mi-avril &agrave; mi-mai ou mi-juin pour le meilleur combo
+      m&eacute;t&eacute;o + peu de monde.
+    </div>
+  </section>
+
+  <div class="sep"><div class="sep-line"></div></div>
+
+  <!-- HIGHLIGHT -->
+  <div class="highlight-section">
+    <div class="highlight-quote reveal">
+      &laquo; Le parc le mieux <span class="hl">th&eacute;matis&eacute;</span> au monde,
+      cach&eacute; dans une petite ville allemande. &raquo;
+    </div>
+    <div class="highlight-sub reveal">Phantasialand &mdash; Br&uuml;hl, Allemagne</div>
+  </div>
+
+  <div class="sep"><div class="sep-line"></div></div>
+
+  <!-- LES ATTRACTIONS -->
+  <section class="section">
+    <div class="reveal">
+      <div class="section-label">Les Attractions</div>
+      <div class="section-title">Ce qui t'attend</div>
+      <div class="section-text">
+        Phantasialand c'est pas Disneyland. C'est le parc le plus immersif d'Europe
+        selon les classements &mdash; devant Europa Park et Parc Ast&eacute;rix &mdash; avec des montagnes russes
+        de classe mondiale dans des d&eacute;cors dignes d'un film.
+        &Eacute;lu &laquo;&nbsp;parc le plus immersif d'Europe&nbsp;&raquo; 7 ann&eacute;es cons&eacute;cutives (Parkscout), 27 r&eacute;compenses
+        internationales en 2024 &agrave; lui seul. Un niveau au-dessus.
+      </div>
+    </div>
+
+    <!-- Records banner -->
+    <div class="records-strip reveal">
+      <div class="record-card" data-delay="0">
+        <div class="record-icon">&#127942;</div>
+        <div class="record-value">#6 mondial</div>
+        <div class="record-label">Taron au Golden Ticket Awards 2024</div>
+      </div>
+      <div class="record-card" data-delay="80">
+        <div class="record-icon">&#127775;</div>
+        <div class="record-value">7 ans</div>
+        <div class="record-label">Parc le plus immersif d'Europe (Parkscout)</div>
+      </div>
+      <div class="record-card" data-delay="160">
+        <div class="record-icon">&#128166;</div>
+        <div class="record-value">8 ans</div>
+        <div class="record-label">Meilleure attraction aquatique d'Europe (Chiapas)</div>
+      </div>
+      <div class="record-card" data-delay="240">
+        <div class="record-icon">&#128640;</div>
+        <div class="record-value">27</div>
+        <div class="record-label">R&eacute;compenses internationales en 2024</div>
+      </div>
+    </div>
+
+    <!-- Taron -->
+    <div class="attraction-card" data-delay="0">
+      <div class="attraction-img">
+        <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/5/59/Klugheim_Taron_2018.jpg/1280px-Klugheim_Taron_2018.jpg" alt="Taron" loading="lazy">
+        <div class="attraction-img-overlay"></div>
+      </div>
+      <div class="attraction-body">
+        <div class="attraction-name">Taron</div>
+        <div class="attraction-desc">
+          Le multi-launch coaster le plus rapide d'Europe. Deux lancements fulgurants
+          &agrave; travers les canyons de basalte de Klugheim. Le train croise son propre rail
+          116 fois &agrave; 58 points d'intersection &mdash; record mondial.
+          Class&eacute; #6 mondial et #1 en Allemagne depuis 2017.
+        </div>
+        <div>
+          <span class="attraction-stat">&#9889; 117 km/h</span>
+          <span class="attraction-stat">&#128208; 1 320 m</span>
+          <span class="attraction-stat">&#128256; 58 croisements</span>
+        </div>
+        <div class="comparison-note">
+          <strong>vs Europa Park :</strong> Silver Star (73m, 127 km/h) est un hyper coaster classique,
+          mais Taron le surpasse en intensit&eacute;, theming et classement. Blue Fire est aussi un launch coaster
+          Intamin, mais un cran en dessous en force et en immersion.
+          <br><strong>vs Parc Ast&eacute;rix :</strong> Ni OzIris ni Goudurix ne rivalisent avec l'exp&eacute;rience Taron.
+        </div>
+        <div class="attraction-tags">
+          <span class="tag tag-thrill">Adr&eacute;naline</span>
+          <span class="tag tag-record">Record europ&eacute;en</span>
+          <span class="tag tag-record">#6 mondial</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- F.L.Y. -->
+    <div class="attraction-card" data-delay="0">
+      <div class="attraction-img">
+        <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/3/38/Phantasialand_FLY_2020_%284%29.jpg/1280px-Phantasialand_FLY_2020_%284%29.jpg" alt="F.L.Y." loading="lazy">
+        <div class="attraction-img-overlay"></div>
+      </div>
+      <div class="attraction-body">
+        <div class="attraction-name">F.L.Y.</div>
+        <div class="attraction-desc">
+          Le plus long flying coaster au monde et le premier avec lancement.
+          Tu voles face vers le sol &agrave; travers Rookburgh, un quartier steampunk des ann&eacute;es 1920
+          construit sur 75m&times;100m avec un h&ocirc;tel, des restos et des boutiques int&eacute;gr&eacute;s.
+          Technologie Vekoma r&eacute;volutionnaire : si&egrave;ges rotatifs (fini le pliage inconfortable des anciens flyers),
+          deux lancements LSM, et 1 309 m de rail qui serpentent entre les b&acirc;timents.
+          IAAPA Brass Ring Award 2021.
+        </div>
+        <div>
+          <span class="attraction-stat">&#9992;&#65039; 1er flying launch</span>
+          <span class="attraction-stat">&#128208; 1 309 m</span>
+        </div>
+        <div class="comparison-note">
+          <strong>vs Europa Park &amp; Parc Ast&eacute;rix :</strong> Aucun des deux parcs n'a de flying coaster.
+          F.L.Y. est litt&eacute;ralement unique au monde &mdash; aucun &eacute;quivalent nulle part.
+        </div>
+        <div class="attraction-tags">
+          <span class="tag tag-unique">Unique au monde</span>
+          <span class="tag tag-record">Record mondial</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Chiapas -->
+    <div class="attraction-card" data-delay="0">
+      <div class="attraction-img">
+        <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/0/09/Chiapas1.JPG/1280px-Chiapas1.JPG" alt="Chiapas" loading="lazy">
+        <div class="attraction-img-overlay"></div>
+      </div>
+      <div class="attraction-body">
+        <div class="attraction-name">Chiapas &mdash; Die Wasserbahn</div>
+        <div class="attraction-desc">
+          &Eacute;lue meilleure attraction aquatique d'Europe pendant 8 ans d'affil&eacute;e.
+          La descente la plus raide au monde (53&deg;) &agrave; travers des ruines mayas.
+          6 minutes de ride sur 5 niveaux avec 3 descentes dont une &agrave; reculons
+          au milieu d'une cave Dia de los Muertos avec lasers et musique.
+          2 aiguillages de rails &mdash; du jamais vu sur un log flume.
+          Bande-son orchestrale par un orchestre de 65 musiciens &agrave; Budapest.
+        </div>
+        <div>
+          <span class="attraction-stat">&#127754; 53&deg; de descente</span>
+          <span class="attraction-stat">&#9200; 6 min</span>
+          <span class="attraction-stat">&#128256; 3 descentes</span>
+        </div>
+        <div class="comparison-note">
+          <strong>vs Europa Park :</strong> Atlantica SuperSplash est sympa mais bien en dessous en immersion
+          et en sensations. Chiapas est dans une autre cat&eacute;gorie.
+          <br><strong>vs Parc Ast&eacute;rix :</strong> Le Grand Splatch est classique. Chiapas red&eacute;finit le genre.
+        </div>
+        <div class="attraction-tags">
+          <span class="tag tag-thrill">Adr&eacute;naline</span>
+          <span class="tag tag-record">Record mondial</span>
+          <span class="tag tag-record">8&times; meilleure d'Europe</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Black Mamba -->
+    <div class="attraction-card" data-delay="0">
+      <div class="attraction-img">
+        <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/7/7a/Black_Mamba_%28Phantasialand%29.jpg/1280px-Black_Mamba_%28Phantasialand%29.jpg" alt="Black Mamba" loading="lazy">
+        <div class="attraction-img-overlay"></div>
+      </div>
+      <div class="attraction-body">
+        <div class="attraction-name">Black Mamba</div>
+        <div class="attraction-desc">
+          Coaster invers&eacute; B&amp;M qui plonge dans des tranch&eacute;es, des grottes et des cascades.
+          Les pieds dans le vide &agrave; 80 km/h. Les 2/3 du trac&eacute; sont sous le niveau du sol,
+          creus&eacute;s dans la jungle de Deep in Africa &mdash; un theming qualit&eacute; Disney avec
+          de vrais arbres, des sons d'animaux et des cascades. Budget : 22M&euro;.
+        </div>
+        <div>
+          <span class="attraction-stat">&#128013; 80 km/h</span>
+          <span class="attraction-stat">&#128208; 800 m</span>
+        </div>
+        <div class="comparison-note">
+          <strong>vs Parc Ast&eacute;rix :</strong> M&ecirc;me type que OzIris (B&amp;M invert&eacute;).
+          OzIris est plus smooth c&ocirc;t&eacute; forces, mais Black Mamba gagne largement
+          en immersion avec ses deux tiers souterrains. Les fans sont divis&eacute;s, mais l'exp&eacute;rience globale penche Phantasialand.
+        </div>
+        <div class="attraction-tags">
+          <span class="tag tag-thrill">Adr&eacute;naline</span>
+          <span class="tag tag-unique">2/3 souterrain</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Mystery Castle -->
+    <div class="attraction-card" data-delay="0">
+      <div class="attraction-img">
+        <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/a/a7/Mystery_Castle_%28Phantasialand%29.JPG/800px-Mystery_Castle_%28Phantasialand%29.JPG" alt="Mystery Castle" loading="lazy">
+        <div class="attraction-img-overlay"></div>
+      </div>
+      <div class="attraction-body">
+        <div class="attraction-name">Mystery Castle</div>
+        <div class="attraction-desc">
+          Tour de chute pneumatique de 65m cach&eacute;e dans un ch&acirc;teau m&eacute;di&eacute;val en ruines.
+          Pas une simple chute : tu es catapult&eacute; vers le haut &agrave; 72 km/h puis tu retombes
+          en bungee &mdash; impossible de pr&eacute;voir quand.
+          Avant le ride, un parcours &agrave; travers des salles hant&eacute;es
+          (galerie ancestrale, labo de chimie, chemin&eacute;e myst&eacute;rieuse) unique en Europe.
+          &Eacute;lue meilleure attraction &agrave; sensations d'Europe 5 fois d'affil&eacute;e.
+        </div>
+        <div>
+          <span class="attraction-stat">&#9959;&#65039; 65 m</span>
+          <span class="attraction-stat">&#9889; 72 km/h</span>
+        </div>
+        <div class="comparison-note">
+          <strong>vs Europa Park &amp; Parc Ast&eacute;rix :</strong> Les tours de chute classiques
+          (Eurosat ou la Tour de Num&eacute;robis) ne rivalisent pas. Mystery Castle est un shot &amp; drop
+          avec un pre-show th&eacute;&acirc;tralis&eacute; sans &eacute;quivalent.
+        </div>
+        <div class="attraction-tags">
+          <span class="tag tag-unique">Unique</span>
+          <span class="tag tag-thrill">Sensations</span>
+          <span class="tag tag-record">5&times; meilleure d'Europe</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Talocan -->
+    <div class="attraction-card" data-delay="0">
+      <div class="attraction-img">
+        <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/6/6e/Talocan2.JPG/1280px-Talocan2.JPG" alt="Talocan" loading="lazy">
+        <div class="attraction-img-overlay"></div>
+      </div>
+      <div class="attraction-body">
+        <div class="attraction-name">Talocan</div>
+        <div class="attraction-desc">
+          Top Spin suspendu unique en Europe. Deux rang&eacute;es dos &agrave; dos, pieds dans le vide,
+          4 rotations compl&egrave;tes &agrave; 360&deg; avec des forces jusqu'&agrave; 4G.
+          Devant toi : un temple azt&egrave;que g&eacute;ant avec la sculpture du dieu Tlaloc
+          qui crache du feu, de l'eau et du tonnerre synchronis&eacute;s avec le ride.
+          Un spectacle autant qu'une attraction.
+        </div>
+        <div>
+          <span class="attraction-stat">&#128293; Effets de feu</span>
+          <span class="attraction-stat">&#127754; Fontaines g&eacute;antes</span>
+          <span class="attraction-stat">&#128168; 4G</span>
+        </div>
+        <div class="attraction-tags">
+          <span class="tag tag-thrill">Sensations</span>
+          <span class="tag tag-unique">Unique en Europe</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- River Quest -->
+    <div class="attraction-card" data-delay="0">
+      <div class="attraction-img">
+        <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/4/41/Phantasialand_River_Quest_Lift.jpg/800px-Phantasialand_River_Quest_Lift.jpg" alt="River Quest" loading="lazy">
+        <div class="attraction-img-overlay"></div>
+      </div>
+      <div class="attraction-body">
+        <div class="attraction-name">River Quest</div>
+        <div class="attraction-desc">
+          Le rafting le plus mouill&eacute; d'Europe. 2 ascenseurs verticaux,
+          un tourbillon, 3 descentes dont une de 11m en chute libre,
+          et un trac&eacute; de 460m &agrave; travers les canyons de Klugheim.
+          Tu seras tremp&eacute; de la t&ecirc;te aux pieds &mdash; c'est garanti.
+        </div>
+        <div>
+          <span class="attraction-stat">&#127754; 11 m de chute</span>
+          <span class="attraction-stat">&#128166; 100% tremp&eacute;</span>
+        </div>
+        <div class="attraction-tags">
+          <span class="tag tag-thrill">Adr&eacute;naline</span>
+          <span class="tag tag-explore">Rafting extr&ecirc;me</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Maus au Chocolat -->
+    <div class="attraction-card" data-delay="0">
+      <div class="attraction-img">
+        <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/5/54/Phantasialand_Klugheim_2016_-_Eingang.jpg/1280px-Phantasialand_Klugheim_2016_-_Eingang.jpg" alt="Klugheim &amp; Maus au Chocolat" loading="lazy">
+        <div class="attraction-img-overlay"></div>
+      </div>
+      <div class="attraction-body">
+        <div class="attraction-name">Maus au Chocolat</div>
+        <div class="attraction-desc">
+          Dark ride interactif en 3D dans un d&eacute;cor de p&acirc;tisserie berlinoise des ann&eacute;es 1920
+          envahie par des souris. Tu tires du chocolat avec un pistolet &agrave; p&acirc;tisserie
+          sur 48 &eacute;crans 3D. Pens&eacute; pour les familles mais incroyablement fun m&ecirc;me pour les adultes.
+          &Eacute;lue meilleure attraction familiale d'Europe &agrave; plusieurs reprises.
+        </div>
+        <div>
+          <span class="attraction-stat">&#127851; 48 &eacute;crans 3D</span>
+          <span class="attraction-stat">&#127942; Multi-prim&eacute;e</span>
+        </div>
+        <div class="attraction-tags">
+          <span class="tag tag-chill">Fun</span>
+          <span class="tag tag-unique">Interactif</span>
+          <span class="tag tag-record">Meilleure familiale d'Europe</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Colorado Adventure -->
+    <div class="attraction-card" data-delay="0">
+      <div class="attraction-img">
+        <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/0/09/Chiapas1.JPG/1280px-Chiapas1.JPG" alt="Colorado Adventure" loading="lazy">
+        <div class="attraction-img-overlay"></div>
+      </div>
+      <div class="attraction-body">
+        <div class="attraction-name">Colorado Adventure</div>
+        <div class="attraction-desc">
+          Mine train coaster de 1 280 m &agrave; travers des canyons rocheux et des mines sombres.
+          3 lancements par pneus (pas de cha&icirc;ne), pr&egrave;s de 3 minutes de ride.
+          Ouvert &agrave; l'origine par Michael Jackson en 1996. Un classique du parc,
+          accessible &agrave; toute la famille mais avec assez de vitesse pour surprendre.
+        </div>
+        <div>
+          <span class="attraction-stat">&#9889; 1 280 m</span>
+          <span class="attraction-stat">&#9200; ~3 min</span>
+        </div>
+        <div class="attraction-tags">
+          <span class="tag tag-explore">Famille</span>
+          <span class="tag tag-chill">Classique</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Winja's -->
+    <div class="attraction-card" data-delay="0">
+      <div class="attraction-img">
+        <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/5/54/Phantasialand_Klugheim_2016_-_Eingang.jpg/1280px-Phantasialand_Klugheim_2016_-_Eingang.jpg" alt="Wuze Town" loading="lazy">
+        <div class="attraction-img-overlay"></div>
+      </div>
+      <div class="attraction-body">
+        <div class="attraction-name">Winja's Fear &amp; Force</div>
+        <div class="attraction-desc">
+          Deux coasters indoor jumeaux o&ugrave; les wagons tournent librement sur eux-m&ecirc;mes apr&egrave;s la premi&egrave;re descente.
+          Mont&eacute;e verticale (pas de cha&icirc;ne classique), section de rail articul&eacute;e qui s'effondre
+          devant toi, et tout &ccedil;a dans le noir complet. Impossible de pr&eacute;voir ce qui arrive.
+        </div>
+        <div>
+          <span class="attraction-stat">&#127922; Spinning libre</span>
+          <span class="attraction-stat">&#128065; Dans le noir</span>
+        </div>
+        <div class="attraction-tags">
+          <span class="tag tag-unique">Spinning</span>
+          <span class="tag tag-thrill">Surprenant</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Themed Worlds -->
+    <div class="attraction-card" data-delay="0">
+      <div class="attraction-img">
+        <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/5/54/Phantasialand_Klugheim_2016_-_Eingang.jpg/1280px-Phantasialand_Klugheim_2016_-_Eingang.jpg" alt="Klugheim" loading="lazy">
+        <div class="attraction-img-overlay"></div>
+      </div>
+      <div class="attraction-body">
+        <div class="attraction-name">Les Mondes Th&eacute;matiques</div>
+        <div class="attraction-desc">
+          <strong>Klugheim</strong> &mdash; Village nordique m&eacute;di&eacute;val entour&eacute; de colonnes de basalte, canyons &agrave; perte de vue.<br>
+          <strong>Rookburgh</strong> &mdash; Quartier steampunk 1920s avec h&ocirc;tel, un dirigeable suspendu, et F.L.Y. qui serpente entre les b&acirc;timents.<br>
+          <strong>Deep in Africa</strong> &mdash; Architecture en terre africaine, odeurs d'&eacute;pices, percussions live, cascades.<br>
+          <strong>Mexico</strong> &mdash; Ruines mayas, temple azt&egrave;que, fiesta permanente avec Chiapas et Talocan.<br>
+          <strong>China Town</strong> &mdash; Pagodes, jardins imp&eacute;riaux, lanternes flottantes, train fant&ocirc;me le plus long d'Europe.<br>
+          <strong>Mystery</strong> &mdash; Ch&acirc;teau gothique hant&eacute;, atmosph&egrave;re de conte noir.
+        </div>
+        <div class="comparison-note">
+          <strong>vs Europa Park :</strong> Europa a des zones par pays europ&eacute;ens, mais le theming de
+          Phantasialand est unanimement consid&eacute;r&eacute; comme plus dense et plus immersif.
+          Europa compense par la taille (95 ha vs 28 ha) et la vari&eacute;t&eacute;.
+          <br><strong>vs Parc Ast&eacute;rix :</strong> L'identit&eacute; BD est forte, mais le theming environnemental
+          est un cran en dessous.
+        </div>
+        <div class="attraction-tags">
+          <span class="tag tag-explore">Explorer</span>
+          <span class="tag tag-unique">Immersif</span>
+          <span class="tag tag-record">#1 Europe</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Facts -->
+    <div class="facts-strip">
+      <div class="fact-card" data-delay="0">
+        <div class="fact-value">1967</div>
+        <div class="fact-label">Ann&eacute;e d'ouverture</div>
+      </div>
+      <div class="fact-card" data-delay="100">
+        <div class="fact-value">6</div>
+        <div class="fact-label">Mondes th&eacute;matiques</div>
+      </div>
+      <div class="fact-card" data-delay="200">
+        <div class="fact-value">40+</div>
+        <div class="fact-label">Attractions</div>
+      </div>
+    </div>
+  </section>
+
+  <div class="sep"><div class="sep-line"></div></div>
+
+  <!-- COLOGNE -->
+  <section class="section">
+    <div class="reveal">
+      <div class="section-label">Bonus</div>
+      <div class="section-title">Cologne, juste &agrave; c&ocirc;t&eacute;</div>
+      <div class="section-text">
+        Phantasialand est &agrave; 20 minutes de Cologne.
+        Si tu as un moment, tu peux aller faire un tour dans une des villes les plus cool d'Allemagne.
+      </div>
+    </div>
+
+    <div class="city-card" data-delay="0">
+      <div class="city-img">
+        <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/2/29/Panorama_cologne_20050114.jpg/1280px-Panorama_cologne_20050114.jpg" alt="Cologne" loading="lazy">
+        <div class="city-img-overlay"></div>
+      </div>
+      <div class="city-body">
+        <div class="city-name">Cologne (K&ouml;ln)</div>
+        <div class="city-desc">
+          Vieille ville de 2000 ans, rives du Rhin, et l'une des meilleures sc&egrave;nes de bi&egrave;re en Allemagne.
+        </div>
+        <ul class="city-things">
+          <li>
+            <span class="ct-icon">&#9962;&#65039;</span>
+            <div><strong>La Cath&eacute;drale (K&ouml;lner Dom)</strong> &mdash; Monument gothique &eacute;norme, classique de la ville. On peut monter en haut pour la vue.</div>
+          </li>
+          <li>
+            <span class="ct-icon">&#127866;</span>
+            <div><strong>K&ouml;lsch &amp; Brauhaus</strong> &mdash; La bi&egrave;re locale servie dans des petits verres de 20cl. On teste un Brauhaus typique.</div>
+          </li>
+          <li>
+            <span class="ct-icon">&#127749;</span>
+            <div><strong>Rives du Rhin</strong> &mdash; Se poser le long du fleuve, vue sur la skyline et les ponts. Parfait en fin de journ&eacute;e.</div>
+          </li>
+          <li>
+            <span class="ct-icon">&#127860;</span>
+            <div><strong>Bouffe</strong> &mdash; Schnitzel, Currywurst, et la street food de la vieille ville. De quoi bien manger avant le retour.</div>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <div class="sep"><div class="sep-line"></div></div>
+
+  <!-- SECOND HIGHLIGHT -->
+  <div class="highlight-section">
+    <div class="highlight-quote reveal">
+      Pas de meilleure fa&ccedil;on de f&ecirc;ter tes <span class="hl">28 ans</span>
+      que de hurler dans un coaster &agrave; 117 km/h.
+    </div>
+    <div class="highlight-sub reveal">Tu vas kiffer, fr&egrave;re</div>
+  </div>
+
+  <div class="sep"><div class="sep-line"></div></div>
+
+  <!-- FOOTER -->
+  <section class="footer">
+    <div class="footer-divider reveal"></div>
+    <div class="footer-msg reveal">Pr&eacute;pare-toi &agrave; envoyer du lourd.</div>
+    <div class="footer-from reveal">Ton pote Hildou</div>
+    <div class="footer-emoji">&#129309;</div>
+  </section>
+
+</div>
+
+<script>
+// STATE
+let unwrapped = false;
+let mapInitialized = false;
+
+// Birthday particles
+(function() {
+  const c = document.getElementById('bdayParticles');
+  if (!c) return;
+  for (let i = 0; i < 30; i++) {
+    const p = document.createElement('div');
+    p.className = 'bday-particle';
+    p.style.left = Math.random() * 100 + '%';
+    p.style.animationDelay = Math.random() * 4 + 's';
+    p.style.animationDuration = (3 + Math.random() * 3) + 's';
+    p.style.width = p.style.height = (1 + Math.random() * 3) + 'px';
+    c.appendChild(p);
+  }
+})();
+
+// UNWRAP
+function startUnwrap() {
+  if (unwrapped) return;
+  unwrapped = true;
+
+  const gs = document.getElementById('gift-screen');
+  gs.classList.add('unwrapping');
+
+  setTimeout(() => {
+    document.getElementById('lightBurst').classList.add('flash');
+    launchConfetti();
+  }, 400);
+
+  setTimeout(() => {
+    gs.classList.add('hidden');
+    const bs = document.getElementById('birthday-screen');
+    bs.classList.add('visible');
+
+    setTimeout(() => document.getElementById('bdayPre').classList.add('show'), 200);
+    setTimeout(() => document.getElementById('bdayName').classList.add('show'), 500);
+    setTimeout(() => document.getElementById('bdayAge').classList.add('show'), 800);
+    setTimeout(() => document.getElementById('bdaySub').classList.add('show'), 1200);
+    setTimeout(() => {
+      document.getElementById('bdayContinue').classList.add('show');
+      document.getElementById('scrollArrow').classList.add('show');
+    }, 1800);
+  }, 900);
+}
+
+// EUROPA SCREEN
+function showEuropaScreen() {
+  const bs = document.getElementById('birthday-screen');
+  const es = document.getElementById('europa-screen');
+
+  bs.classList.add('hidden');
+  es.classList.add('visible');
+
+  setTimeout(() => document.getElementById('europaLine1').classList.add('show'), 300);
+  setTimeout(() => document.getElementById('europaLine2').classList.add('show'), 1200);
+  setTimeout(() => document.getElementById('europaDots').classList.add('show'), 2200);
+  setTimeout(() => document.getElementById('europaLine3').classList.add('show'), 3000);
+  setTimeout(() => {
+    document.getElementById('europaContinue').classList.add('show');
+    document.getElementById('europaArrow').classList.add('show');
+  }, 3800);
+}
+
+// REVEAL GIFT
+function revealGift() {
+  const es = document.getElementById('europa-screen');
+  const mc = document.getElementById('main-content');
+
+  es.classList.add('hidden');
+  mc.classList.add('visible');
+
+  setTimeout(() => {
+    initMap();
+    initCalendar();
+    initScrollObserver();
+  }, 300);
+}
+
+// CONFETTI
+function launchConfetti() {
+  const canvas = document.getElementById('confetti-canvas');
+  const ctx = canvas.getContext('2d');
+  canvas.width = window.innerWidth;
+  canvas.height = window.innerHeight;
+
+  const colors = ['#e8b94a', '#f5d77a', '#ff6b3d', '#e74c3c', '#6c5ce7', '#f0ece4', '#2ecc71', '#d44637'];
+  const confetti = [];
+
+  const origins = [
+    { x: canvas.width * 0.3, y: canvas.height * 0.5 },
+    { x: canvas.width * 0.5, y: canvas.height * 0.4 },
+    { x: canvas.width * 0.7, y: canvas.height * 0.5 },
+  ];
+
+  origins.forEach(o => {
+    for (let i = 0; i < 60; i++) {
+      confetti.push({
+        x: o.x + (Math.random() - 0.5) * 60,
+        y: o.y + (Math.random() - 0.5) * 40,
+        w: Math.random() * 10 + 4,
+        h: Math.random() * 6 + 3,
+        color: colors[Math.floor(Math.random() * colors.length)],
+        vx: (Math.random() - 0.5) * 24,
+        vy: Math.random() * -20 - 6,
+        rotation: Math.random() * 360,
+        rv: (Math.random() - 0.5) * 14,
+        gravity: 0.3 + Math.random() * 0.1,
+        opacity: 1,
+        decay: 0.002 + Math.random() * 0.004,
+        shape: Math.random() > 0.5 ? 'rect' : 'circle',
+      });
+    }
+  });
+
+  function animate() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    let alive = false;
+    for (const c of confetti) {
+      if (c.opacity <= 0) continue;
+      alive = true;
+      c.x += c.vx; c.vy += c.gravity; c.y += c.vy;
+      c.vx *= 0.985; c.rotation += c.rv; c.opacity -= c.decay;
+      ctx.save();
+      ctx.translate(c.x, c.y);
+      ctx.rotate((c.rotation * Math.PI) / 180);
+      ctx.globalAlpha = Math.max(0, c.opacity);
+      ctx.fillStyle = c.color;
+      if (c.shape === 'circle') {
+        ctx.beginPath();
+        ctx.arc(0, 0, c.w / 2, 0, Math.PI * 2);
+        ctx.fill();
+      } else {
+        ctx.fillRect(-c.w / 2, -c.h / 2, c.w, c.h);
+      }
+      ctx.restore();
+    }
+    if (alive) requestAnimationFrame(animate);
+  }
+  animate();
+}
+
+// MAP
+function initMap() {
+  if (mapInitialized) return;
+  mapInitialized = true;
+
+  const map = L.map('map', {
+    zoomControl: false,
+    dragging: true,
+    scrollWheelZoom: false,
+    doubleClickZoom: false,
+    touchZoom: true,
+  }).setView([49.8, 4.6], 6);
+
+  L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+    attribution: '\u00a9 <a href="https://www.openstreetmap.org/copyright">OSM</a> \u00a9 <a href="https://carto.com/">CARTO</a>',
+    subdomains: 'abcd',
+    maxZoom: 19,
+  }).addTo(map);
+
+  const routeCoords = [
+    [48.8809, 2.3553],
+    [49.0200, 2.5400],
+    [49.2500, 2.8000],
+    [49.4300, 3.0600],
+    [49.5600, 3.2800],
+    [49.7000, 3.5000],
+    [49.8500, 3.6800],
+    [50.0000, 3.8000],
+    [50.1500, 3.9000],
+    [50.3000, 4.0000],
+    [50.4500, 4.0800],
+    [50.6000, 4.1500],
+    [50.7000, 4.2200],
+    [50.8360, 4.3366],
+    [50.8800, 4.5000],
+    [50.9000, 4.7200],
+    [50.8800, 5.0000],
+    [50.8200, 5.2500],
+    [50.7000, 5.4500],
+    [50.6245, 5.5667],
+    [50.6800, 5.7000],
+    [50.7200, 5.8500],
+    [50.7500, 5.9800],
+    [50.7678, 6.0915],
+    [50.8200, 6.2500],
+    [50.8600, 6.4000],
+    [50.8900, 6.5500],
+    [50.9100, 6.7000],
+    [50.9413, 6.9583],
+    [50.8800, 6.9200],
+    [50.8300, 6.9000],
+    [50.7987, 6.8792],
+  ];
+
+  function mkIcon(html, size) {
+    return L.divIcon({ className: 'custom-marker', html: html, iconSize: [size, size], iconAnchor: [size/2, size/2] });
+  }
+
+  L.marker([48.8809, 2.3553], { icon: mkIcon('<div class="marker-dot"><span class="marker-label">Paris<span class="marker-sub">Gare du Nord</span></span></div>', 16) }).addTo(map);
+  L.marker([50.7987, 6.8792], { icon: mkIcon('<div class="marker-dot accent"><span class="marker-label">Phantasialand<span class="marker-sub">Br\u00fchl</span></span></div>', 16) }).addTo(map);
+
+  ['Bruxelles','Li\u00e8ge','Aachen','Cologne'].forEach((name, i) => {
+    const coords = [[50.8360,4.3366],[50.6245,5.5667],[50.7678,6.0915],[50.9413,6.9583]][i];
+    L.marker(coords, { icon: mkIcon('<div class="marker-dot" style="transform:scale(0.6);opacity:0.6"><span class="marker-label" style="font-size:9px;color:#8a8694;top:16px">' + name + '</span></div>', 16) }).addTo(map);
+  });
+
+  map.fitBounds(L.latLngBounds(routeCoords).pad(0.15));
+
+  // Animate
+  L.polyline(routeCoords, { color: 'rgba(232,185,74,0.1)', weight: 3, smoothFactor: 1.5 }).addTo(map);
+
+  const line = L.polyline([], { color: '#e8b94a', weight: 3.5, opacity: 0.9, smoothFactor: 1.5, dashArray: '8 6', lineCap: 'round' }).addTo(map);
+  const glow = L.polyline([], { color: '#e8b94a', weight: 8, opacity: 0.15, smoothFactor: 1.5, lineCap: 'round' }).addTo(map);
+
+  const trainIcon = L.divIcon({ className: 'custom-marker', html: '<div style="font-size:20px;filter:drop-shadow(0 2px 6px rgba(0,0,0,0.5))">&#128646;</div>', iconSize: [24,24], iconAnchor: [12,12] });
+  const train = L.marker(routeCoords[0], { icon: trainIcon }).addTo(map);
+
+  let idx = 0;
+  function draw() {
+    if (idx >= routeCoords.length) return;
+    const pts = line.getLatLngs();
+    pts.push(L.latLng(routeCoords[idx]));
+    line.setLatLngs(pts);
+    glow.setLatLngs(pts);
+    train.setLatLng(routeCoords[idx]);
+    idx++;
+    setTimeout(draw, 70);
+  }
+  setTimeout(draw, 600);
+}
+
+// SCROLL OBSERVER
+function initScrollObserver() {
+  const obs = new IntersectionObserver((entries) => {
+    entries.forEach(e => {
+      if (e.isIntersecting) {
+        const d = parseInt(e.target.dataset.delay || '0');
+        setTimeout(() => e.target.classList.add('visible'), d);
+        obs.unobserve(e.target);
+      }
+    });
+  }, { threshold: 0.12, rootMargin: '0px 0px -30px 0px' });
+
+  document.querySelectorAll(
+    '.reveal, .reveal-left, .reveal-right, .reveal-scale, .route-card, .attraction-card, .record-card, .timeline-item, .fact-card, .city-card, .highlight-quote, .highlight-sub, .footer-divider, .footer-msg, .footer-from'
+  ).forEach(el => obs.observe(el));
+
+  // Parallax floating decorations
+  var decors = document.querySelectorAll('.bg-decor');
+  if (decors.length > 0) {
+    window.addEventListener('scroll', function() {
+      var scrollY = window.scrollY;
+      decors.forEach(function(el) {
+        var speed = parseFloat(el.dataset.speed) || 0.02;
+        el.style.transform = 'translateY(' + (scrollY * speed * -60) + 'px)';
+      });
+    }, { passive: true });
+  }
+}
+
+// CALENDAR
+function initCalendar() {
+  const container = document.getElementById('calendarContainer');
+  if (!container || container.children.length > 0) return;
+
+  const parkHours = {
+    4: { open: '9:00', close: '18:00' },
+    5: { open: '9:00', close: '18:00' },
+    6: { open: '9:00', close: '18:00' },
+    7: { open: '9:00', close: '19:00' },
+  };
+
+  const holidays = [
+    '2026-04-03','2026-04-06',
+    '2026-05-01','2026-05-14','2026-05-25',
+    '2026-06-04',
+  ];
+
+  function isSchoolHoliday(date) {
+    var d = new Date(date);
+    var m = d.getMonth() + 1, day = d.getDate();
+    if ((m === 3 && day >= 30) || (m === 4 && day <= 11)) return true;
+    if (m === 5 && day >= 14 && day <= 17) return true;
+    if (m === 5 && day >= 25 && day <= 31) return true;
+    if (m === 6 && day >= 4 && day <= 7) return true;
+    if ((m === 6 && day >= 29) || m === 7) return true;
+    return false;
+  }
+
+  function getCrowdLevel(date) {
+    var d = new Date(date);
+    var dow = d.getDay();
+    var ds = d.toISOString().split('T')[0];
+    if (dow === 0 || dow === 6) return 4;
+    if (holidays.includes(ds)) return 5;
+    if (isSchoolHoliday(date)) {
+      if (dow === 1 || dow === 5) return 4;
+      return 3;
+    }
+    if (dow === 1 || dow === 5) return 2;
+    return 1;
+  }
+
+  var crowdLabels = ['','Tr\u00e8s calme','Calme','Mod\u00e9r\u00e9','Fr\u00e9quent\u00e9','Tr\u00e8s fr\u00e9quent\u00e9'];
+  var dayNames = ['Lun','Mar','Mer','Jeu','Ven','Sam','Dim'];
+  var monthNames = {4:'Avril',5:'Mai',6:'Juin',7:'Juillet'};
+  var fullDays = ['Dimanche','Lundi','Mardi','Mercredi','Jeudi','Vendredi','Samedi'];
+  var fullMonths = ['janvier','f\u00e9vrier','mars','avril','mai','juin','juillet','ao\u00fbt','septembre','octobre','novembre','d\u00e9cembre'];
+  var selectedParkDay1 = null;
+
+  for (var month = 4; month <= 7; month++) {
+    var monthDiv = document.createElement('div');
+    monthDiv.className = 'cal-month-grid';
+    var title = document.createElement('div');
+    title.className = 'cal-month-title';
+    title.textContent = monthNames[month] + ' 2026';
+    monthDiv.appendChild(title);
+
+    var grid = document.createElement('div');
+    grid.className = 'cal-grid';
+    dayNames.forEach(function(n) {
+      var h = document.createElement('div');
+      h.className = 'cal-header';
+      h.textContent = n;
+      grid.appendChild(h);
+    });
+
+    var firstDay = new Date(2026, month - 1, 1);
+    var startDow = firstDay.getDay();
+    startDow = startDow === 0 ? 6 : startDow - 1;
+    for (var e = 0; e < startDow; e++) {
+      var empty = document.createElement('div');
+      empty.className = 'cal-day empty';
+      grid.appendChild(empty);
+    }
+
+    var daysInMonth = new Date(2026, month, 0).getDate();
+    var today = new Date();
+    today.setHours(0,0,0,0);
+
+    for (var day = 1; day <= daysInMonth; day++) {
+      var date = new Date(2026, month - 1, day);
+      var dateStr = date.getFullYear() + '-' + String(date.getMonth()+1).padStart(2,'0') + '-' + String(date.getDate()).padStart(2,'0');
+      var dow = date.getDay();
+      var cell = document.createElement('div');
+      cell.className = 'cal-day';
+      cell.dataset.date = dateStr;
+      var num = document.createElement('span');
+      num.textContent = day;
+      cell.appendChild(num);
+
+      if (date < today) {
+        cell.classList.add('past');
+      } else if (dow === 0 || dow === 6) {
+        cell.classList.add('weekend');
+      } else if (dow >= 1 && dow <= 4) {
+        var nextDate = new Date(2026, month - 1, day + 1);
+        var nextDow = nextDate.getDay();
+        if (nextDow >= 1 && nextDow <= 5) {
+          cell.classList.add('selectable');
+          var crowd = getCrowdLevel(date);
+          var dot = document.createElement('div');
+          dot.className = 'cal-crowd-dot crowd-' + crowd;
+          cell.appendChild(dot);
+          if (crowd <= 2 && dow >= 2 && dow <= 4) {
+            var crowd2 = getCrowdLevel(nextDate);
+            if (crowd2 <= 2) cell.classList.add('recommended');
+          }
+          (function(ds){ cell.addEventListener('click', function(){ selectDate(ds); }); })(dateStr);
+        } else {
+          cell.classList.add('weekend');
+        }
+      } else {
+        cell.classList.add('closed');
+      }
+      grid.appendChild(cell);
+    }
+    monthDiv.appendChild(grid);
+    container.appendChild(monthDiv);
+  }
+
+  function selectDate(dateStr) {
+    document.querySelectorAll('.cal-day.selected-arrival,.cal-day.selected-park').forEach(function(el) {
+      el.classList.remove('selected-arrival','selected-park');
+    });
+    selectedParkDay1 = dateStr;
+    var parts = dateStr.split('-');
+    var d1 = new Date(+parts[0], +parts[1]-1, +parts[2], 12);
+    var d0 = new Date(d1); d0.setDate(d0.getDate() - 1);
+    var d2 = new Date(d1); d2.setDate(d2.getDate() + 1);
+    var fmt = function(d) {
+      return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+    };
+    var arrCell = document.querySelector('.cal-day[data-date="'+fmt(d0)+'"]');
+    var p1Cell = document.querySelector('.cal-day[data-date="'+fmt(d1)+'"]');
+    var p2Cell = document.querySelector('.cal-day[data-date="'+fmt(d2)+'"]');
+    if (arrCell) arrCell.classList.add('selected-arrival');
+    if (p1Cell) p1Cell.classList.add('selected-park');
+    if (p2Cell) p2Cell.classList.add('selected-park');
+    showDetail(d0, d1, d2);
+  }
+
+  function showDetail(arrival, day1, day2) {
+    var panel = document.getElementById('calDetail');
+    var titleEl = document.getElementById('calDetailTitle');
+    var rows = document.getElementById('calDetailRows');
+    var fmtD = function(d) { return fullDays[d.getDay()]+' '+d.getDate()+' '+fullMonths[d.getMonth()]; };
+    var m1 = day1.getMonth()+1, m2 = day2.getMonth()+1;
+    var h1 = parkHours[m1]||parkHours[7], h2 = parkHours[m2]||parkHours[7];
+    var c1 = getCrowdLevel(day1), c2 = getCrowdLevel(day2);
+    titleEl.textContent = 'Ton s\u00e9jour';
+    rows.innerHTML =
+      '<div class="cal-detail-row"><div class="cal-detail-icon train">\ud83d\ude86</div><div class="cal-detail-info"><div class="cal-detail-day">'+fmtD(arrival)+'</div><div class="cal-detail-meta">Train Paris \u2192 Cologne en fin de journ\u00e9e<br>Arriv\u00e9e le soir, nuit \u00e0 l\u2019h\u00f4tel/Airbnb \u00e0 Br\u00fchl</div></div></div>'+
+      '<div class="cal-detail-row"><div class="cal-detail-icon park">\ud83c\udfa2</div><div class="cal-detail-info"><div class="cal-detail-day">'+fmtD(day1)+' \u2014 Jour 1</div><div class="cal-detail-meta">Parc ouvert de '+h1.open+' \u00e0 '+h1.close+'</div><div class="cal-detail-crowd c'+c1+'"><span>\u25cf</span> '+crowdLabels[c1]+'</div></div></div>'+
+      '<div class="cal-detail-row"><div class="cal-detail-icon return">\ud83c\udfa2</div><div class="cal-detail-info"><div class="cal-detail-day">'+fmtD(day2)+' \u2014 Jour 2</div><div class="cal-detail-meta">Parc ouvert de '+h2.open+' \u00e0 '+h2.close+'<br>Dernier train retour le soir</div><div class="cal-detail-crowd c'+c2+'"><span>\u25cf</span> '+crowdLabels[c2]+'</div></div></div>';
+    panel.classList.add('visible');
+    panel.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  }
+}
+
+// RESIZE
+window.addEventListener('resize', () => {
+  const c = document.getElementById('confetti-canvas');
+  if (c) { c.width = window.innerWidth; c.height = window.innerHeight; }
+});
+</script>
+</body>
+</html>
