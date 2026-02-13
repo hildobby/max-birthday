@@ -1164,31 +1164,84 @@
   .cal-legend-dot.l4 { background: #e74c3c; }
   .cal-legend-dot.rec { background: transparent; border: 2px solid var(--gold); }
 
+  /* Horizontal scroll wrapper */
+  .cal-scroll-wrap {
+    position: relative;
+  }
+
+  #calendarContainer {
+    display: flex;
+    gap: 20px;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    padding-bottom: 8px;
+  }
+  #calendarContainer::-webkit-scrollbar { display: none; }
+
+  .cal-scroll-hint {
+    position: absolute;
+    top: 0; bottom: 8px; right: 0; width: 60px;
+    background: linear-gradient(90deg, transparent, var(--bg) 80%);
+    pointer-events: none;
+    z-index: 2;
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    padding-right: 4px;
+    transition: opacity 0.4s ease;
+  }
+  .cal-scroll-hint.hidden { opacity: 0; }
+
+  .cal-scroll-arrow {
+    width: 28px; height: 28px;
+    border-radius: 50%;
+    background: rgba(232,185,74,0.12);
+    border: 1px solid rgba(232,185,74,0.25);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    animation: scrollArrowPulse 1.8s ease-in-out infinite;
+  }
+  .cal-scroll-arrow svg {
+    width: 14px; height: 14px;
+    stroke: var(--gold); fill: none;
+    stroke-width: 2.5; stroke-linecap: round; stroke-linejoin: round;
+  }
+  @keyframes scrollArrowPulse {
+    0%, 100% { transform: translateX(0); opacity: 0.6; }
+    50% { transform: translateX(4px); opacity: 1; }
+  }
+
   .cal-month-grid {
-    margin-bottom: 32px;
+    flex: 0 0 auto;
+    width: 280px;
+    scroll-snap-align: start;
   }
 
   .cal-month-title {
     font-family: 'Playfair Display', serif;
-    font-size: 20px;
+    font-size: 18px;
     font-weight: 700;
-    margin-bottom: 12px;
+    margin-bottom: 10px;
     color: var(--white);
+    text-align: center;
   }
 
   .cal-grid {
     display: grid;
     grid-template-columns: repeat(7, 1fr);
-    gap: 4px;
+    gap: 3px;
   }
 
   .cal-header {
-    font-size: 10px;
+    font-size: 9px;
     letter-spacing: 1px;
     text-transform: uppercase;
     color: var(--gray);
     text-align: center;
-    padding: 6px 0;
+    padding: 4px 0;
     font-weight: 600;
   }
 
@@ -1199,8 +1252,8 @@
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    border-radius: 10px;
-    font-size: 14px;
+    border-radius: 8px;
+    font-size: 13px;
     font-weight: 500;
     color: var(--gray);
     background: transparent;
@@ -1353,9 +1406,11 @@
   .cal-rec-banner strong { color: var(--gold); }
 
   @media (max-width: 480px) {
-    .cal-day { font-size: 12px; border-radius: 8px; }
+    .cal-month-grid { width: 260px; }
+    .cal-day { font-size: 12px; border-radius: 6px; }
     .cal-crowd-dot { width: 4px; height: 4px; margin-top: 2px; }
     .cal-detail { padding: 20px 18px; }
+    .cal-grid { gap: 2px; }
   }
 
   /* ==================================================================
@@ -1762,7 +1817,14 @@
       </div>
     </div>
 
-    <div id="calendarContainer" class="reveal"></div>
+    <div class="cal-scroll-wrap reveal">
+      <div id="calendarContainer"></div>
+      <div class="cal-scroll-hint" id="calScrollHint">
+        <div class="cal-scroll-arrow">
+          <svg viewBox="0 0 24 24"><path d="M9 5l7 7-7 7"/></svg>
+        </div>
+      </div>
+    </div>
 
     <div class="cal-detail" id="calDetail">
       <div class="cal-detail-title" id="calDetailTitle"></div>
@@ -2653,6 +2715,16 @@ function initCalendar() {
       '<div class="cal-detail-row"><div class="cal-detail-icon return">\ud83c\udfa2</div><div class="cal-detail-info"><div class="cal-detail-day">'+fmtD(day2)+' \u2014 Jour 2</div><div class="cal-detail-meta">Parc ouvert de '+h2.open+' \u00e0 '+h2.close+'<br>Dernier train retour le soir</div><div class="cal-detail-crowd c'+c2+'"><span>\u25cf</span> '+crowdLabels[c2]+'</div></div></div>';
     panel.classList.add('visible');
     panel.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  }
+
+  // Hide scroll hint when scrolled to end
+  var hint = document.getElementById('calScrollHint');
+  if (hint && container) {
+    container.addEventListener('scroll', function() {
+      var atEnd = container.scrollLeft + container.clientWidth >= container.scrollWidth - 30;
+      if (atEnd) hint.classList.add('hidden');
+      else hint.classList.remove('hidden');
+    }, { passive: true });
   }
 }
 
